@@ -6,7 +6,7 @@ import {
   AIPersona,
 } from "@shared/types";
 
-// Case Management Utilities
+// Case Management Utilities with AI and Persistence
 export class CaseManager {
   private static instance: CaseManager;
   private cases: Map<string, Case> = new Map();
@@ -37,7 +37,24 @@ export class CaseManager {
                 c.timeline?.map((t: any) => ({
                   ...t,
                   date: new Date(t.date),
+                  timestamp: new Date(t.timestamp),
                   createdAt: new Date(t.createdAt),
+                })) || [],
+              evidence:
+                c.evidence?.map((e: any) => ({
+                  ...e,
+                  uploadedAt: new Date(e.uploadedAt),
+                })) || [],
+              deadlines:
+                c.deadlines?.map((d: any) => ({
+                  ...d,
+                  dueDate: new Date(d.dueDate),
+                  createdAt: new Date(d.createdAt),
+                })) || [],
+              notes:
+                c.notes?.map((n: any) => ({
+                  ...n,
+                  createdAt: new Date(n.createdAt),
                 })) || [],
             },
           ]) || [],
@@ -111,6 +128,7 @@ Click on different tabs to explore your legal toolbox. I'm here to guide you thr
     this.addNote(caseId, welcomeNote);
   }
 
+  // AI Persona Management
   getPersonaName(): string {
     const personas = {
       strategist: "The Strategist",
@@ -119,6 +137,18 @@ Click on different tabs to explore your legal toolbox. I'm here to guide you thr
       ally: "The Ally",
     };
     return personas[this.activePersona];
+  }
+
+  getPersonaDescription(): string {
+    const descriptions = {
+      strategist:
+        "Analytical and methodical. Focuses on evidence gaps and legal strategy.",
+      guide:
+        "Patient and educational. Explains legal concepts in simple terms.",
+      razor: "Direct and decisive. Cuts through complexity to key issues.",
+      ally: "Supportive and encouraging. Emphasizes your strengths and progress.",
+    };
+    return descriptions[this.activePersona];
   }
 
   setActivePersona(persona: AIPersona): void {
@@ -130,6 +160,142 @@ Click on different tabs to explore your legal toolbox. I'm here to guide you thr
     return this.activePersona;
   }
 
+  // AI Response Generation
+  generateAIResponse(
+    input: string,
+    context: "file-upload" | "timeline" | "general" = "general",
+  ): string {
+    const persona = this.activePersona;
+
+    switch (context) {
+      case "file-upload":
+        return this.generateFileUploadResponse(input, persona);
+      case "timeline":
+        return this.generateTimelineResponse(input, persona);
+      default:
+        return this.generateGeneralResponse(input, persona);
+    }
+  }
+
+  private generateFileUploadResponse(
+    input: string,
+    persona: AIPersona,
+  ): string {
+    const responses = {
+      strategist: `📊 **Evidence Analysis Complete**
+
+I've processed your file and extracted key information. Here's what I found strategically important:
+
+${input}
+
+**My Strategic Assessment:**
+- This document strengthens your position by providing concrete evidence
+- I've automatically tagged relevant legal concepts for easy reference
+- Consider how this connects to your timeline - I've added any dates I found
+
+**Next Strategic Steps:**
+1. Review the extracted information for accuracy
+2. Link this evidence to relevant timeline facts
+3. Consider what additional evidence might support this document`,
+
+      guide: `📚 **File Processing Complete - Let me explain what happened**
+
+I've successfully processed your file! Here's what I did:
+
+${input}
+
+**What this means for your case:**
+- I extracted readable text so you can search through it later
+- Any dates I found were automatically added to your timeline
+- I tagged the file with relevant legal keywords I recognized
+
+**Learning Moment:**
+This is how we build strong legal cases - one document at a time. Each piece of evidence tells part of your story.`,
+
+      razor: `⚡ **File Processed - Here's what matters:**
+
+${input}
+
+**Bottom Line:**
+- File analyzed and catalogued
+- Key dates extracted and added to timeline
+- Ready for your next upload
+
+**Action Required:**
+Upload more evidence or move to timeline building. Don't overthink it.`,
+
+      ally: `💪 **Great job uploading that file!**
+
+You're building a strong foundation for your case. Here's what I accomplished:
+
+${input}
+
+**You're doing amazing:**
+- Every document you upload strengthens your position
+- I'm here to handle the technical details while you focus on your story
+- Your case is becoming more organized with each step
+
+**Keep going:**
+You've got this! Upload more files or start building your timeline when you're ready.`,
+    };
+
+    return responses[persona];
+  }
+
+  private generateTimelineResponse(input: string, persona: AIPersona): string {
+    const responses = {
+      strategist: `⏳ **Timeline Analysis**
+
+${input}
+
+**Strategic Timeline Assessment:**
+- Chronological organization strengthens your narrative
+- Look for patterns and causal relationships between events
+- Identify any gaps that need additional evidence
+
+**Timeline Strategy:**
+Focus on facts that directly support your legal claims.`,
+
+      guide: `📅 **Timeline Building Progress**
+
+${input}
+
+**Understanding Your Timeline:**
+Your timeline is the backbone of your case. It shows when things happened and how they connect.
+
+**Why This Matters:**
+Courts love clear chronologies. It helps them understand your story and make fair decisions.`,
+
+      razor: `⚡ **Timeline Updated**
+
+${input}
+
+**Key Point:**
+Timeline is your case roadmap. Keep it factual, keep it tight.`,
+
+      ally: `🎯 **Timeline Looking Strong!**
+
+${input}
+
+**You're Building Something Powerful:**
+Each fact you add makes your case clearer and stronger. You're turning scattered events into a compelling story.`,
+    };
+
+    return responses[persona];
+  }
+
+  private generateGeneralResponse(input: string, persona: AIPersona): string {
+    const responses = {
+      strategist: `🎯 **Strategic Analysis:** ${input}`,
+      guide: `📖 **Here to Help:** ${input}`,
+      razor: `⚡ **Direct Response:** ${input}`,
+      ally: `💫 **You've Got This:** ${input}`,
+    };
+
+    return responses[persona];
+  }
+
+  // Case Management Methods
   getCases(): Case[] {
     return Array.from(this.cases.values()).sort(
       (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
@@ -153,6 +319,16 @@ Click on different tabs to explore your legal toolbox. I'm here to guide you thr
     return this.activeCase;
   }
 
+  updateCase(caseId: string, updates: Partial<Case>): Case {
+    const case_ = this.cases.get(caseId);
+    if (!case_) throw new Error("Case not found");
+
+    Object.assign(case_, updates);
+    case_.updatedAt = new Date();
+    this.saveToStorage();
+    return case_;
+  }
+
   addTimelineFact(
     caseId: string,
     fact: Omit<TimelineFact, "id" | "factNumber" | "createdAt">,
@@ -165,6 +341,7 @@ Click on different tabs to explore your legal toolbox. I'm here to guide you thr
       id: `fact-${Date.now()}`,
       factNumber: case_.timeline.length + 1,
       createdAt: new Date(),
+      timestamp: fact.date, // Ensure timestamp is set
     };
 
     case_.timeline.push(newFact);
@@ -172,6 +349,7 @@ Click on different tabs to explore your legal toolbox. I'm here to guide you thr
       (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
     );
     case_.updatedAt = new Date();
+    this.saveToStorage();
 
     return newFact;
   }
@@ -191,6 +369,7 @@ Click on different tabs to explore your legal toolbox. I'm here to guide you thr
 
     case_.evidence.push(newEvidence);
     case_.updatedAt = new Date();
+    this.saveToStorage();
 
     return newEvidence;
   }
@@ -206,149 +385,85 @@ Click on different tabs to explore your legal toolbox. I'm here to guide you thr
 
     case_.persons.push(newPerson);
     case_.updatedAt = new Date();
+    this.saveToStorage();
 
     return newPerson;
   }
 
-  updateCase(id: string, updates: Partial<Case>): boolean {
-    const case_ = this.cases.get(id);
-    if (!case_) return false;
-
-    Object.assign(case_, updates, { updatedAt: new Date() });
-    return true;
-  }
-
-  exportCaseData(caseId: string): string {
+  addNote(caseId: string, note: any): any {
     const case_ = this.cases.get(caseId);
     if (!case_) throw new Error("Case not found");
 
-    return JSON.stringify(case_, null, 2);
-  }
-}
+    case_.notes.push(note);
+    case_.updatedAt = new Date();
+    this.saveToStorage();
 
-// AI Personas
-export const AI_PERSONAS: AIPersona[] = [
-  {
-    id: "strategist",
-    name: "The Strategist",
-    description:
-      "Clear, concise, and objective. A no-nonsense professional focused on the facts and the most direct path to building your case.",
-    chatTone: "professional",
-    draftingStyle: "formal",
-  },
-  {
-    id: "guide",
-    name: "The Guide",
-    description:
-      "Patient, empathetic, and supportive. This AI acts as a calm mentor, designed to reduce stress and guide you through the process one step at a time.",
-    chatTone: "supportive",
-    draftingStyle: "explanatory",
-  },
-  {
-    id: "razor",
-    name: "The Razor",
-    description:
-      "Witty, blunt, and fiercely strategic, with a touch of gallows humor. This AI is your partner-in-crime, designed to keep you motivated by treating the law like a competitive sport.",
-    chatTone: "witty",
-    draftingStyle: "aggressive",
-  },
-  {
-    id: "ally",
-    name: "The Ally",
-    description:
-      "Relatable, modern, and direct. This AI cuts through the old-fashioned legal jargon and communicates like a savvy, tech-forward peer.",
-    chatTone: "modern",
-    draftingStyle: "plain-english",
-  },
-];
-
-// Legal Concepts Detector
-export class LegalConceptDetector {
-  private static concepts = new Map([
-    [
-      "excessive force",
-      [
-        "force",
-        "violence",
-        "physical",
-        "hit",
-        "struck",
-        "yanked",
-        "grabbed",
-        "pushed",
-      ],
-    ],
-    [
-      "unlawful search",
-      ["search", "searched", "looked through", "went through", "checked"],
-    ],
-    [
-      "false imprisonment",
-      ["detained", "held", "wouldn't let", "prevented", "trapped"],
-    ],
-    [
-      "due process violation",
-      ["no warning", "no explanation", "didn't tell me", "sudden"],
-    ],
-    [
-      "miranda violation",
-      ["didn't read rights", "no miranda", "rights not read"],
-    ],
-  ]);
-
-  static detectConcepts(text: string): string[] {
-    const lowerText = text.toLowerCase();
-    const detected: string[] = [];
-
-    for (const [concept, keywords] of this.concepts) {
-      const hasKeyword = keywords.some((keyword) =>
-        lowerText.includes(keyword),
-      );
-      if (hasKeyword) {
-        detected.push(concept);
-      }
-    }
-
-    return detected;
-  }
-}
-
-// Legal Education Content
-export class LegalEducator {
-  private static explanations = new Map([
-    [
-      "excessive force",
-      {
-        definition:
-          "The use of physical force by law enforcement that exceeds what a reasonable officer would use under the circumstances.",
-        standard:
-          'Courts analyze excessive force claims under the Fourth Amendment using the "objective reasonableness" standard from Graham v. Connor.',
-        elements: [
-          "Severity of crime",
-          "Immediate threat to safety",
-          "Active resistance or flight attempt",
-        ],
-        keyCase: "Graham v. Connor, 490 U.S. 386 (1989)",
-      },
-    ],
-    [
-      "unlawful search",
-      {
-        definition:
-          "A search conducted without a valid warrant, consent, or applicable exception to the warrant requirement.",
-        standard:
-          "The Fourth Amendment protects against unreasonable searches and seizures.",
-        elements: ["No warrant", "No consent", "No applicable exception"],
-        keyCase: "Terry v. Ohio, 392 U.S. 1 (1968)",
-      },
-    ],
-  ]);
-
-  static getExplanation(concept: string) {
-    return this.explanations.get(concept);
+    return note;
   }
 
-  static getAllConcepts(): string[] {
-    return Array.from(this.explanations.keys());
+  // Legal Education and Verification
+  educateUser(concept: string): string {
+    const educationalContent: Record<string, string> = {
+      "burden of proof":
+        "The burden of proof is your responsibility to provide evidence that supports your claims. In civil cases, this is usually 'preponderance of the evidence' - meaning more likely than not.",
+      damages:
+        "Damages are the monetary compensation you seek for harm caused. They can be compensatory (to make you whole) or punitive (to punish wrongdoing).",
+      discovery:
+        "Discovery is the pre-trial process where both sides exchange evidence and information. This includes documents, depositions, and interrogatories.",
+      settlement:
+        "A settlement is an agreement to resolve the case without going to trial. Most cases settle - it saves time and money for everyone involved.",
+      jurisdiction:
+        "Jurisdiction is the court's authority to hear your case. You must file in the right geographic area and court level for your type of case.",
+    };
+
+    return (
+      educationalContent[concept.toLowerCase()] ||
+      `I don't have specific educational content for "${concept}" yet, but I can help you research this legal concept further.`
+    );
+  }
+
+  detectLegalConcepts(text: string): string[] {
+    const concepts = [
+      "contract",
+      "breach",
+      "damages",
+      "negligence",
+      "fraud",
+      "liability",
+      "discovery",
+      "settlement",
+      "jurisdiction",
+      "burden of proof",
+      "evidence",
+      "testimony",
+      "witness",
+      "plaintiff",
+      "defendant",
+      "motion",
+      "appeal",
+    ];
+
+    return concepts.filter((concept) => text.toLowerCase().includes(concept));
+  }
+
+  translateToLegalLanguage(emotionalText: string): string {
+    const translations: Record<string, string> = {
+      "they screwed me over":
+        "the defendant breached their contractual obligations",
+      "they lied to me": "the defendant made material misrepresentations",
+      "they stole from me": "the defendant unlawfully converted my property",
+      "they hurt me": "the defendant's actions caused me harm and damages",
+      "it's not fair":
+        "the defendant's conduct violates established legal standards",
+      "they refused to pay":
+        "the defendant failed to fulfill their payment obligations",
+    };
+
+    let result = emotionalText;
+    Object.entries(translations).forEach(([emotional, legal]) => {
+      result = result.replace(new RegExp(emotional, "gi"), legal);
+    });
+
+    return result;
   }
 }
