@@ -1,9 +1,8 @@
 // PDF Processing Utilities using PDF.js
 import * as pdfjsLib from "pdfjs-dist";
 
-// Completely disable worker - run everything on main thread
-// This avoids all worker loading issues in cloud environments
-pdfjsLib.GlobalWorkerOptions.workerSrc = false;
+// Use a stable CDN for the worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 export interface ProcessedDocument {
   fileName: string;
