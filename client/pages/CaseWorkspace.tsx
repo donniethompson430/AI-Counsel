@@ -30,8 +30,10 @@ import SourcesTab from "@/components/workspace/SourcesTab";
 import DocumentsTab from "@/components/workspace/DocumentsTab";
 import DeadlinesTab from "@/components/workspace/DeadlinesTab";
 import NotesTab from "@/components/workspace/NotesTab";
+import AIInterview from "@/components/AIInterview";
 
 type TabType =
+  | "ai"
   | "dashboard"
   | "timeline"
   | "evidence"
@@ -42,6 +44,7 @@ type TabType =
   | "notes";
 
 const TABS = [
+  { id: "ai", name: "🤖 AI Counsel", icon: Scale },
   { id: "dashboard", name: "📊 Dashboard", icon: BarChart3 },
   { id: "timeline", name: "⏳ Factual Timeline", icon: Clock },
   { id: "evidence", name: "🗄 Evidence Locker", icon: FolderOpen },
@@ -55,7 +58,7 @@ const TABS = [
 export default function CaseWorkspace() {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  const [activeTab, setActiveTab] = useState<TabType>("ai");
   const [case_, setCase] = useState<Case | null>(null);
   const [wellnessMode, setWellnessMode] = useState(false);
   const caseManager = CaseManager.getInstance();
@@ -104,6 +107,8 @@ export default function CaseWorkspace() {
     if (!case_) return null;
 
     switch (activeTab) {
+      case "ai":
+        return <AIInterview case={case_} onCaseUpdate={setCase} />;
       case "dashboard":
         return <DashboardTab case={case_} onCaseUpdate={setCase} />;
       case "timeline":
