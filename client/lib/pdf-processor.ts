@@ -1,13 +1,9 @@
 // PDF Processing Utilities using PDF.js
 import * as pdfjsLib from "pdfjs-dist";
 
-// Set up PDF.js worker with fallback
-try {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-} catch (error) {
-  // Disable worker as fallback - will be slower but still work
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "";
-}
+// Disable worker to avoid loading issues in cloud environment
+// This makes PDF processing run on main thread (slower but reliable)
+pdfjsLib.GlobalWorkerOptions.workerSrc = "";
 
 export interface ProcessedDocument {
   fileName: string;
