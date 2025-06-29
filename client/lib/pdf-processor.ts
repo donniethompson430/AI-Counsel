@@ -1,9 +1,6 @@
 // PDF Processing Utilities using PDF.js
 import * as pdfjsLib from "pdfjs-dist";
 
-// Use a stable CDN for the worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
-
 export interface ProcessedDocument {
   fileName: string;
   pageCount: number;
@@ -15,7 +12,11 @@ export class PDFProcessor {
   static async extractTextFromFile(file: File): Promise<ProcessedDocument> {
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({
+        data: arrayBuffer,
+        useWorkerFetch: false,
+        disableWorker: true,
+      }).promise;
 
       let fullText = "";
       const pageCount = pdf.numPages;
@@ -48,7 +49,11 @@ export class PDFProcessor {
 
   static async extractTextFromUrl(url: string): Promise<ProcessedDocument> {
     try {
-      const pdf = await pdfjsLib.getDocument(url).promise;
+      const pdf = await pdfjsLib.getDocument({
+        url,
+        useWorkerFetch: false,
+        disableWorker: true,
+      }).promise;
 
       let fullText = "";
       const pageCount = pdf.numPages;
