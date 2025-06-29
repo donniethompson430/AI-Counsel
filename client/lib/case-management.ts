@@ -11,12 +11,54 @@ export class CaseManager {
   private static instance: CaseManager;
   private cases: Map<string, Case> = new Map();
   private activeCase: Case | null = null;
+  private activePersona: AIPersona = "guide";
 
   static getInstance(): CaseManager {
     if (!CaseManager.instance) {
       CaseManager.instance = new CaseManager();
+      CaseManager.instance.loadFromStorage();
     }
     return CaseManager.instance;
+  }
+
+  private loadFromStorage(): void {
+    try {
+      const stored = localStorage.getItem("ai-counsel-cases");
+      if (stored) {
+        const data = JSON.parse(stored);
+        this.cases = new Map(
+          data.cases?.map((c: any) => [
+            c.id,
+            {
+              ...c,
+              createdAt: new Date(c.createdAt),
+              updatedAt: new Date(c.updatedAt),
+              timeline:
+                c.timeline?.map((t: any) => ({
+                  ...t,
+                  date: new Date(t.date),
+                  createdAt: new Date(t.createdAt),
+                })) || [],
+            },
+          ]) || [],
+        );
+        this.activePersona = data.activePersona || "guide";
+      }
+    } catch (error) {
+      console.warn("Failed to load cases from storage:", error);
+    }
+  }
+
+  private saveToStorage(): void {
+    try {
+      const data = {
+        cases: Array.from(this.cases.values()),
+        activePersona: this.activePersona,
+      };
+      localStorage.setItem("ai-counsel-cases", JSON.stringify(data));
+    } catch (error) {
+      console.warn("Failed to save cases to storage:", error);
+    }
   }
 
   createCase(title: string, description?: string): Case {
@@ -38,7 +80,54 @@ export class CaseManager {
     };
 
     this.cases.set(id, newCase);
+    this.saveToStorage();
+
+    // Start AI interview process
+    this.initiateAIInterview(id);
+
     return newCase;
+  }
+
+  private initiateAIInterview(caseId: string): void {
+    const welcomeNote = {
+      id: `note-${Date.now()}`,
+      content: `🤖 **AI Counsel ${this.getPersonaName()} is ready to help!**
+
+I've created your case workspace. Let's start building your legal case step by step.
+
+**Next steps I recommend:**
+1. **Upload key documents** - Start with the most important files (contracts, emails, photos)
+2. **Tell me what happened** - I'll help translate your story into legal language
+3. **Build your timeline** - I'll guide you through organizing events chronologically
+
+Click on different tabs to explore your legal toolbox. I'm here to guide you through each step.
+
+*Tip: Try uploading a document first - I'll automatically extract dates and create timeline entries!*`,
+      createdAt: new Date(),
+      tags: ["ai-generated", "welcome"],
+      type: "ai-guidance" as any,
+    };
+
+    this.addNote(caseId, welcomeNote);
+  }
+
+  getPersonaName(): string {
+    const personas = {
+      strategist: "The Strategist",
+      guide: "The Guide",
+      razor: "Razor",
+      ally: "The Ally",
+    };
+    return personas[this.activePersona];
+  }
+
+  setActivePersona(persona: AIPersona): void {
+    this.activePersona = persona;
+    this.saveToStorage();
+  }
+
+  getActivePersona(): AIPersona {
+    return this.activePersona;
   }
 
   getCases(): Case[] {
