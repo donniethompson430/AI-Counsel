@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Case, EvidenceFile } from "@shared/types";
 import { CaseManager } from "@/lib/case-management";
-import { PDFProcessor, FileValidator } from "@/lib/pdf-processor";
+import { FileProcessor } from "@/lib/file-processor";
 import { toast } from "@/hooks/use-toast";
 
 interface DashboardTabProps {
@@ -42,61 +42,57 @@ export default function DashboardTab({
       let processed = 0;
 
       for (const file of fileArray) {
-        // Validate file
-        const validation = FileValidator.validateFile(file);
-        if (!validation.valid) {
-          toast({
-            title: "File Validation Failed",
-            description: `${file.name}: ${validation.error}`,
-            variant: "destructive",
-          });
-          continue;
-        }
+        try {
+          // Process file with robust processor
+          const processed = await FileProcessor.processFile(file);
 
-        // Process PDF files
-        if (file.type === "application/pdf") {
-          try {
-            const processed = await PDFProcessor.extractTextFromFile(file);
-
-            const evidence: Omit<EvidenceFile, "id" | "uploadedAt"> = {
-              fileName: file.name,
-              fileType: file.type,
-              fileSize: file.size,
-              extractedText: processed.text,
-              factIds: [],
-              tags: [],
-              redacted: false,
-            };
-
-            caseManager.addEvidence(case_.id, evidence);
-
+          if (processed.error) {
             toast({
-              title: "File Processed",
-              description: `Successfully processed ${file.name}`,
-            });
-          } catch (error) {
-            toast({
-              title: "Processing Error",
-              description: `Failed to process ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
+              title: "File Processing Failed",
+              description: `${file.name}: ${processed.error}`,
               variant: "destructive",
             });
+            continue;
           }
-        } else {
-          // Handle other file types (images, videos, etc.)
+
           const evidence: Omit<EvidenceFile, "id" | "uploadedAt"> = {
-            fileName: file.name,
-            fileType: file.type,
-            fileSize: file.size,
+            fileName: processed.fileName,
+            fileType: processed.fileType,
+            fileSize: processed.fileSize,
+            extractedText:
+              processed.metadata.extractedText || processed.content,
             factIds: [],
-            tags: [],
+            tags: processed.metadata.keywords || [],
             redacted: false,
           };
 
           caseManager.addEvidence(case_.id, evidence);
 
+          // Auto-add timeline facts from extracted dates
+          if (processed.metadata.dates && processed.metadata.dates.length > 0) {
+            processed.metadata.dates.forEach((date, index) => {
+              const fact = {
+                description: `Date referenced in ${file.name}`,
+                date,
+                source: file.name,
+                verified: false,
+                linkedEvidenceIds: [],
+                linkedPersonIds: [],
+                tags: ["auto-extracted"],
+              };
+              caseManager.addTimelineFact(case_.id, fact);
+            });
+          }
+
           toast({
-            title: "File Added",
-            description: `Added ${file.name} to evidence locker`,
+            title: "File Processed Successfully",
+            description: `${file.name} - ${processed.metadata.extractedText ? "Text extracted" : "Metadata captured"}`,
+          });
+        } catch (error) {
+          toast({
+            title: "Processing Error",
+            description: `Failed to process ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
+            variant: "destructive",
           });
         }
 
