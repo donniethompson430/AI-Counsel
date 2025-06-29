@@ -53,6 +53,12 @@ export default function AIInterview({
   const [selectedPersona, setSelectedPersona] = useState<AIPersona>("guide");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const caseManager = CaseManager.getInstance();
+  const [lastEvidenceCount, setLastEvidenceCount] = useState(
+    case_.evidence.length,
+  );
+  const [lastTimelineCount, setLastTimelineCount] = useState(
+    case_.timeline.length,
+  );
 
   useEffect(() => {
     // Initialize with welcome message
@@ -64,7 +70,7 @@ export default function AIInterview({
 I'm here to help you build a strong legal case. I can:
 
 🔍 **Analyze your documents** - Upload files and I'll extract key information
-📅 **Build your timeline** - Organize events chronologically  
+📅 **Build your timeline** - Organize events chronologically
 📝 **Translate your story** - Convert emotional language to legal terms
 🎯 **Guide your strategy** - Suggest next steps based on your case type
 
@@ -84,6 +90,67 @@ What would you like to work on first?`,
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Monitor case changes for real-time AI responses
+  useEffect(() => {
+    const currentEvidenceCount = case_.evidence.length;
+    const currentTimelineCount = case_.timeline.length;
+
+    // Check for new evidence files
+    if (currentEvidenceCount > lastEvidenceCount) {
+      const newFiles = case_.evidence.slice(lastEvidenceCount);
+      newFiles.forEach((file) => {
+        const aiResponse = caseManager.generateAIResponse(
+          `I see you just uploaded "${file.fileName}"! ${file.extractedText ? "I extracted the text content and" : "I captured the metadata and"} ${file.tags.length > 0 ? `found ${file.tags.length} relevant legal keywords: ${file.tags.join(", ")}.` : "analyzed the file structure."} This strengthens your evidence collection.`,
+          "file-upload",
+        );
+
+        const aiMessage: Message = {
+          id: `msg-${Date.now()}-${file.id}`,
+          type: "ai",
+          content: aiResponse,
+          timestamp: new Date(),
+          persona: selectedPersona,
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
+      });
+      setLastEvidenceCount(currentEvidenceCount);
+    }
+
+    // Check for new timeline facts
+    if (currentTimelineCount > lastTimelineCount) {
+      const newFacts = case_.timeline.slice(lastTimelineCount);
+      const autoExtracted = newFacts.filter((fact) =>
+        fact.tags.includes("auto-extracted"),
+      );
+
+      if (autoExtracted.length > 0) {
+        const aiResponse = caseManager.generateAIResponse(
+          `Great! I automatically extracted ${autoExtracted.length} timeline ${autoExtracted.length === 1 ? "fact" : "facts"} from your uploaded documents. Your case timeline is becoming more complete and organized.`,
+          "timeline",
+        );
+
+        const aiMessage: Message = {
+          id: `msg-${Date.now()}-timeline`,
+          type: "ai",
+          content: aiResponse,
+          timestamp: new Date(),
+          persona: selectedPersona,
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
+      }
+      setLastTimelineCount(currentTimelineCount);
+    }
+  }, [
+    case_.evidence.length,
+    case_.timeline.length,
+    lastEvidenceCount,
+    lastTimelineCount,
+    selectedPersona,
+    caseManager,
+  ]);
 
   const handlePersonaChange = (persona: AIPersona) => {
     setSelectedPersona(persona);
@@ -241,7 +308,7 @@ You're being incredibly brave by taking action. 💫`,
   };
 
   const generateDocumentResponse = (): string => {
-    return `���� **Document Upload Guidance**
+    return `📄 **Document Upload Guidance**
 
 Great idea! Documents are the backbone of strong legal cases. Here's how to get the most from your uploads:
 
@@ -378,7 +445,7 @@ Be direct - what exactly do you need help with?
 
 **Options:**
 - Upload documents ➜ Go to Dashboard tab
-- Build timeline ➜ Go to Timeline tab  
+- Build timeline ➜ Go to Timeline tab
 - Legal questions ➜ Ask me directly
 - Case strategy ➜ Tell me your goal
 
@@ -386,7 +453,7 @@ Pick one and let's get to work.`,
 
       ally: `💫 **I'm here for whatever you need**
 
-You're doing great just by asking questions and taking action. 
+You're doing great just by asking questions and taking action.
 
 **I can help with:**
 - Understanding legal concepts

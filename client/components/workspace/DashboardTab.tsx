@@ -84,27 +84,9 @@ export default function DashboardTab({
             });
           }
 
-          const aiResponse = caseManager.generateAIResponse(
-            `File "${file.name}" processed successfully. ${
-              processed.metadata.extractedText
-                ? `Extracted text content and found ${processed.metadata.dates?.length || 0} dates, ${processed.metadata.keywords?.length || 0} legal keywords.`
-                : "Captured file metadata."
-            }${processed.metadata.dates?.length ? ` Auto-added ${processed.metadata.dates.length} timeline facts from extracted dates.` : ""}`,
-            "file-upload",
-          );
-
-          // Add AI feedback note
-          caseManager.addNote(case_.id, {
-            id: `note-${Date.now()}`,
-            content: aiResponse,
-            createdAt: new Date(),
-            tags: ["ai-generated", "file-upload"],
-            type: "ai-guidance",
-          });
-
           toast({
             title: "File Processed Successfully",
-            description: `${file.name} - AI analysis complete! Check AI Counsel tab for detailed feedback.`,
+            description: `${file.name} - AI analysis complete! Check AI Counsel tab for live feedback.`,
           });
         } catch (error) {
           toast({
