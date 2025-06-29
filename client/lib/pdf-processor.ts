@@ -1,17 +1,9 @@
 // PDF Processing Utilities using PDF.js
 import * as pdfjsLib from "pdfjs-dist";
 
-// Set worker to use a data URL to avoid network issues
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  "data:application/javascript;base64," +
-  btoa(`
-  importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
-`);
-
-// Fallback: disable worker entirely if above fails
-if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = false;
-}
+// Completely disable worker - run everything on main thread
+// This avoids all worker loading issues in cloud environments
+pdfjsLib.GlobalWorkerOptions.workerSrc = false;
 
 export interface ProcessedDocument {
   fileName: string;
