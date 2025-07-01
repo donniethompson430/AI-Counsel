@@ -583,6 +583,25 @@ export default function ViolationInterviewEngine({
               have occurred:
             </p>
 
+            {selectedViolations.length > 0 && (
+              <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                <p className="text-sm text-green-800">
+                  <strong>Selected:</strong> {selectedViolations.length}{" "}
+                  violation(s)
+                </p>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {selectedViolations.map((id) => {
+                    const violation = VIOLATIONS.find((v) => v.id === id);
+                    return (
+                      <Badge key={id} className="bg-green-100 text-green-800">
+                        {violation?.name}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {VIOLATIONS.map((violation) => {
               const Icon = violation.icon;
               const isSelected = selectedViolations.includes(violation.id);
