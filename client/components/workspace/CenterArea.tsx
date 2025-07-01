@@ -135,146 +135,47 @@ export default function CenterArea({
   };
 
   const renderSummaryView = () => {
-    const strength = getCaseStrength();
-    const recentFacts = case_.timeline.slice(-3);
-    const recentEvidence = case_.evidence.slice(-3);
-
     return (
-      <div className="space-y-6">
-        {/* Case Overview */}
-        <Card className="legal-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-legal-primary" />
-              Case Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">
-                  {case_.timeline.length}
-                </div>
-                <div className="text-sm text-blue-800">Timeline Facts</div>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
-                  {case_.evidence.length}
-                </div>
-                <div className="text-sm text-green-800">Evidence Files</div>
-              </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">
-                  {case_.persons.length}
-                </div>
-                <div className="text-sm text-purple-800">People</div>
-              </div>
+      <Card className="legal-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-legal-primary" />
+            Case Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-lg">{case_.title}</h3>
+              <p className="text-sm text-muted-foreground">ID: {case_.id}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Status: <Badge variant="outline">{case_.status}</Badge>
+              </p>
             </div>
 
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Case Strength</span>
-                <Badge className={`${strength.bg} ${strength.color}`}>
-                  {strength.level}
-                </Badge>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-legal-primary h-2 rounded-full transition-all"
-                  style={{
-                    width: `${Math.min(100, case_.timeline.length * 10 + case_.evidence.length * 5)}%`,
-                  }}
-                ></div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Recent Facts
-                </h4>
-                {recentFacts.length > 0 ? (
-                  <ul className="space-y-1">
-                    {recentFacts.map((fact) => (
-                      <li
-                        key={fact.id}
-                        className="text-sm text-muted-foreground"
-                      >
-                        • {fact.description.substring(0, 60)}...
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No facts yet</p>
-                )}
+                <div className="text-xl font-bold text-blue-600">
+                  {case_.timeline?.length || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">Facts</div>
               </div>
               <div>
-                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Recent Evidence
-                </h4>
-                {recentEvidence.length > 0 ? (
-                  <ul className="space-y-1">
-                    {recentEvidence.map((evidence) => (
-                      <li
-                        key={evidence.id}
-                        className="text-sm text-muted-foreground"
-                      >
-                        • {evidence.name}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No evidence yet
-                  </p>
-                )}
+                <div className="text-xl font-bold text-green-600">
+                  {case_.evidence?.length || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">Evidence</div>
+              </div>
+              <div>
+                <div className="text-xl font-bold text-purple-600">
+                  {case_.persons?.length || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">People</div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
-        <Card className="legal-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-legal-primary" />
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <Button
-                onClick={() => onTabChange("violations")}
-                className="justify-start h-auto p-4"
-                variant="outline"
-              >
-                <Shield className="h-5 w-5 mr-3" />
-                <div className="text-left">
-                  <div className="font-semibold">Analyze Violations</div>
-                  <div className="text-sm text-muted-foreground">
-                    Identify legal violations in your case
-                  </div>
-                </div>
-              </Button>
-              <Button
-                onClick={() => onTabChange("timeline")}
-                className="justify-start h-auto p-4"
-                variant="outline"
-              >
-                <Clock className="h-5 w-5 mr-3" />
-                <div className="text-left">
-                  <div className="font-semibold">Build Timeline</div>
-                  <div className="text-sm text-muted-foreground">
-                    Add more facts to your case
-                  </div>
-                </div>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   };
 
