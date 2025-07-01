@@ -235,8 +235,12 @@ export default function DashboardTab({
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Supported formats: PDF, Images (JPG, PNG, GIF), Videos (MP4, MOV),
-              Audio (MP3, WAV). Maximum file size: 50MB per file.
+              Supported formats: PDF, TXT, DOC, DOCX, Images (JPG, PNG, GIF),
+              Videos (MP4, MOV), Audio (MP3, WAV). Maximum file size: 50MB per
+              file.
+              <br />
+              💡 <strong>Tip:</strong> TXT files provide the best text
+              extraction for AI analysis!
             </AlertDescription>
           </Alert>
 
@@ -281,7 +285,7 @@ export default function DashboardTab({
             ref={fileInputRef}
             type="file"
             multiple
-            accept=".pdf,.jpg,.jpeg,.png,.gif,.mp4,.mov,.mp3,.wav"
+            accept=".pdf,.txt,.doc,.docx,.rtf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.mp3,.wav"
             onChange={(e) => {
               if (e.target.files && e.target.files.length > 0) {
                 handleFileUpload(e.target.files);
