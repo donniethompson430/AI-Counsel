@@ -358,7 +358,7 @@ export default function RightSidebar({
       <h4 className="font-semibold text-sm">Recent Activity</h4>
 
       <div className="space-y-3 max-h-[400px] overflow-auto">
-        {case_.timeline
+        {(case_.timeline || [])
           .slice(-10)
           .reverse()
           .map((fact, index) => (
@@ -366,16 +366,17 @@ export default function RightSidebar({
               <div className="w-2 h-2 bg-legal-primary rounded-full mt-1.5 flex-shrink-0" />
               <div className="flex-1">
                 <p className="text-muted-foreground">
-                  Fact {fact.factNumber}: {fact.description.substring(0, 60)}...
+                  Fact {fact.factNumber}:{" "}
+                  {(fact.description || "").substring(0, 60)}...
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {fact.date.toLocaleDateString()}
+                  {fact.date?.toLocaleDateString() || "No date"}
                 </p>
               </div>
             </div>
           ))}
 
-        {case_.timeline.length === 0 && (
+        {(case_.timeline?.length || 0) === 0 && (
           <div className="text-center text-muted-foreground py-8">
             <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
             <p className="text-sm">No timeline facts yet</p>
