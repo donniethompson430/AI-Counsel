@@ -1,0 +1,736 @@
+import { useState, useRef, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Bot,
+  User,
+  Send,
+  Sparkles,
+  Brain,
+  Zap,
+  Heart,
+  MessageSquare,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Scale,
+  FileText,
+  Users,
+  MapPin,
+  Calendar,
+  Eye,
+  Edit,
+  Check,
+  X,
+} from "lucide-react";
+import { Case, AIPersona, TimelineFact, Person } from "@shared/types";
+import { CaseManager } from "@/lib/case-management";
+
+interface AIInterviewEngineProps {
+  case: Case;
+  onCaseUpdate: (updatedCase: Case) => void;
+}
+
+interface ExtractedFact {
+  id: string;
+  description: string;
+  date: Date;
+  source: string;
+  verified: boolean;
+  legalConcepts?: string[];
+  translatedLanguage?: string;
+  originalLanguage?: string;
+  confidence: "high" | "medium" | "low";
+  type: "event" | "statement" | "observation" | "communication";
+}
+
+interface ExtractedPerson {
+  id: string;
+  name: string;
+  role: string;
+  source: string;
+  verified: boolean;
+  confidence: "high" | "medium" | "low";
+}
+
+interface InterviewSession {
+  id: string;
+  phase: "analysis" | "briefing" | "verification" | "education" | "completion";
+  currentFactIndex: number;
+  extractedFacts: ExtractedFact[];
+  extractedPersons: ExtractedPerson[];
+  verifiedFacts: ExtractedFact[];
+  pendingEducation: string[];
+}
+
+const PERSONA_ICONS = {
+  strategist: Brain,
+  guide: MessageSquare,
+  razor: Zap,
+  ally: Heart,
+};
+
+const PERSONA_COLORS = {
+  strategist: "bg-blue-100 text-blue-800",
+  guide: "bg-green-100 text-green-800",
+  razor: "bg-orange-100 text-orange-800",
+  ally: "bg-pink-100 text-pink-800",
+};
+
+export default function AIInterviewEngine({
+  case: case_,
+  onCaseUpdate,
+}: AIInterviewEngineProps) {
+  const [session, setSession] = useState<InterviewSession | null>(null);
+  const [selectedPersona, setSelectedPersona] = useState<AIPersona>("guide");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentEducationTopic, setCurrentEducationTopic] = useState<
+    string | null
+  >(null);
+  const [userInput, setUserInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const caseManager = CaseManager.getInstance();
+
+  // Monitor for new file uploads to trigger analysis
+  useEffect(() => {
+    const lastEvidence = case_.evidence[case_.evidence.length - 1];
+    if (lastEvidence && !session) {
+      console.log("New file detected, starting AI analysis...");
+      initiateAnalysisSession();
+    }
+  }, [case_.evidence.length]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [session]);
+
+  const initiateAnalysisSession = async () => {
+    setIsProcessing(true);
+
+    // Analyze all uploaded files
+    const extractedFacts = await analyzeAllFiles();
+    const extractedPersons = await extractPersonsFromFiles();
+
+    const newSession: InterviewSession = {
+      id: `session-${Date.now()}`,
+      phase: "briefing",
+      currentFactIndex: 0,
+      extractedFacts,
+      extractedPersons,
+      verifiedFacts: [],
+      pendingEducation: [],
+    };
+
+    setSession(newSession);
+    setIsProcessing(false);
+  };
+
+  const analyzeAllFiles = async (): Promise<ExtractedFact[]> => {
+    const facts: ExtractedFact[] = [];
+
+    for (const evidence of case_.evidence) {
+      if (evidence.extractedText) {
+        // Extract events and statements from text
+        const extractedEvents = extractEventsFromText(
+          evidence.extractedText,
+          evidence.fileName,
+        );
+        facts.push(...extractedEvents);
+      }
+    }
+
+    return facts;
+  };
+
+  const extractEventsFromText = (
+    text: string,
+    source: string,
+  ): ExtractedFact[] => {
+    const facts: ExtractedFact[] = [];
+    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 10);
+
+    sentences.forEach((sentence, index) => {
+      const trimmed = sentence.trim();
+      if (trimmed.length < 20) return;
+
+      // Look for action verbs and temporal indicators
+      const actionWords = [
+        "pulled",
+        "stopped",
+        "told",
+        "said",
+        "grabbed",
+        "hit",
+        "arrested",
+        "searched",
+        "asked",
+        "ordered",
+        "forced",
+        "threw",
+        "kicked",
+        "shot",
+        "tased",
+        "handcuffed",
+      ];
+      const hasAction = actionWords.some((word) =>
+        trimmed.toLowerCase().includes(word),
+      );
+
+      if (hasAction) {
+        // Try to extract date from context
+        const dateMatch = trimmed.match(
+          /(\d{1,2}\/\d{1,2}\/\d{4}|\d{1,2}-\d{1,2}-\d{4}|January|February|March|April|May|June|July|August|September|October|November|December)/i,
+        );
+        const estimatedDate = dateMatch ? new Date(dateMatch[0]) : new Date();
+
+        // Detect legal concepts
+        const legalConcepts = detectLegalConcepts(trimmed);
+
+        // Determine if emotional language needs translation
+        const emotionalWords = [
+          "yanked",
+          "grabbed",
+          "threw",
+          "slammed",
+          "screamed",
+          "terrified",
+          "scared",
+          "humiliated",
+        ];
+        const needsTranslation = emotionalWords.some((word) =>
+          trimmed.toLowerCase().includes(word),
+        );
+
+        facts.push({
+          id: `fact-${Date.now()}-${index}`,
+          description: trimmed,
+          date: estimatedDate,
+          source,
+          verified: false,
+          legalConcepts,
+          originalLanguage: needsTranslation ? trimmed : undefined,
+          confidence: hasAction && dateMatch ? "high" : "medium",
+          type: "event",
+        });
+      }
+    });
+
+    return facts;
+  };
+
+  const extractPersonsFromFiles = async (): Promise<ExtractedPerson[]> => {
+    const persons: ExtractedPerson[] = [];
+    const namePattern = /\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g;
+    const officerPattern = /Officer\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/gi;
+
+    for (const evidence of case_.evidence) {
+      if (evidence.extractedText) {
+        // Extract officer names
+        let match;
+        while ((match = officerPattern.exec(evidence.extractedText)) !== null) {
+          persons.push({
+            id: `person-${Date.now()}-${match[1]}`,
+            name: match[1],
+            role: "Police Officer",
+            source: evidence.fileName,
+            verified: false,
+            confidence: "high",
+          });
+        }
+
+        // Extract general names
+        const names = evidence.extractedText.match(namePattern) || [];
+        names.forEach((name) => {
+          if (!persons.some((p) => p.name === name) && !isCommonPhrase(name)) {
+            persons.push({
+              id: `person-${Date.now()}-${name}`,
+              name,
+              role: "Unknown",
+              source: evidence.fileName,
+              verified: false,
+              confidence: "medium",
+            });
+          }
+        });
+      }
+    }
+
+    return persons;
+  };
+
+  const detectLegalConcepts = (text: string): string[] => {
+    const concepts = [];
+    const lower = text.toLowerCase();
+
+    if (
+      lower.includes("force") ||
+      lower.includes("grabbed") ||
+      lower.includes("hit")
+    ) {
+      concepts.push("Excessive Force");
+    }
+    if (lower.includes("search") || lower.includes("looked")) {
+      concepts.push("Fourth Amendment Search");
+    }
+    if (lower.includes("arrest") || lower.includes("handcuff")) {
+      concepts.push("False Arrest");
+    }
+    if (lower.includes("stop") || lower.includes("pulled over")) {
+      concepts.push("Traffic Stop");
+    }
+
+    return concepts;
+  };
+
+  const isCommonPhrase = (text: string): boolean => {
+    const common = [
+      "United States",
+      "Police Department",
+      "District Court",
+      "Supreme Court",
+      "State Police",
+    ];
+    return common.some((phrase) => text.includes(phrase));
+  };
+
+  const verifyCurrentFact = (approved: boolean, editedText?: string) => {
+    if (!session) return;
+
+    const currentFact = session.extractedFacts[session.currentFactIndex];
+    if (approved) {
+      const verifiedFact = {
+        ...currentFact,
+        verified: true,
+        description: editedText || currentFact.description,
+      };
+
+      // Add to case timeline
+      const timelineFact = {
+        description: verifiedFact.description,
+        date: verifiedFact.date,
+        timestamp: verifiedFact.date,
+        source: verifiedFact.source,
+        verified: true,
+        linkedEvidenceIds: [],
+        linkedPersonIds: [],
+        tags: verifiedFact.legalConcepts || [],
+      };
+
+      caseManager.addTimelineFact(case_.id, timelineFact);
+
+      setSession((prev) => ({
+        ...prev!,
+        verifiedFacts: [...prev!.verifiedFacts, verifiedFact],
+        currentFactIndex: prev!.currentFactIndex + 1,
+        phase:
+          prev!.currentFactIndex + 1 >= prev!.extractedFacts.length
+            ? "completion"
+            : "verification",
+      }));
+
+      // Update case
+      const updatedCase = caseManager.getCase(case_.id);
+      if (updatedCase) {
+        onCaseUpdate(updatedCase);
+      }
+    } else {
+      // Skip this fact
+      setSession((prev) => ({
+        ...prev!,
+        currentFactIndex: prev!.currentFactIndex + 1,
+        phase:
+          prev!.currentFactIndex + 1 >= prev!.extractedFacts.length
+            ? "completion"
+            : "verification",
+      }));
+    }
+  };
+
+  const translateEmotionalLanguage = (text: string): string => {
+    const translations: Record<string, string> = {
+      yanked: "forcibly removed",
+      grabbed: "seized",
+      threw: "forcibly moved",
+      slammed: "forcibly contacted",
+      screamed: "spoke in a loud voice",
+      terrified: "caused fear and distress",
+      scared: "intimidated",
+      humiliated: "subjected to degrading treatment",
+    };
+
+    let translated = text;
+    Object.entries(translations).forEach(([emotional, legal]) => {
+      translated = translated.replace(new RegExp(emotional, "gi"), legal);
+    });
+
+    return translated;
+  };
+
+  const educateOnConcept = (concept: string): string => {
+    const education: Record<string, string> = {
+      "Excessive Force": `**Excessive Force** under the Fourth Amendment is analyzed using the "objective reasonableness" standard from Graham v. Connor. The court considers:
+      
+• **Severity of the crime** - Was this a serious offense or minor violation?
+• **Immediate threat** - Did you pose a threat to officer or public safety?  
+• **Active resistance** - Were you resisting arrest or attempting to flee?
+
+The force must be reasonable from the perspective of a reasonable officer at the scene, not with 20/20 hindsight.`,
+
+      "Fourth Amendment Search": `**Fourth Amendment Protection** against unreasonable searches requires either:
+
+• **Probable Cause + Warrant** - A judge authorized the search based on evidence
+• **Recognized Exception** - Like plain view, consent, search incident to arrest, or exigent circumstances
+
+**Key Point:** You have the right to refuse consent to searches. Saying "I do not consent" preserves your rights even if they search anyway.`,
+
+      "False Arrest": `**False Arrest** occurs when you're detained without legal justification. Officers need:
+
+• **Probable Cause** - Facts that would lead a reasonable person to believe you committed a crime
+• **Warrant** - For arrests in your home (with exceptions)
+• **Lawful Authority** - The power to make the arrest
+
+**Element to Prove:** The arrest lacked probable cause or legal authority.`,
+
+      "Traffic Stop": `**Traffic Stops** are "seizures" under the Fourth Amendment requiring:
+
+• **Reasonable Suspicion** - Specific facts suggesting traffic violation or criminal activity
+• **Scope Limitation** - Stop must be reasonably related to the justification
+• **Duration** - Must be reasonably brief
+
+**Key Point:** You can ask "Am I free to leave?" to clarify if you're detained.`,
+    };
+
+    return (
+      education[concept] ||
+      `I don't have specific educational content for "${concept}" yet, but this is a legal concept worth researching further.`
+    );
+  };
+
+  const renderAnalysisPhase = () => (
+    <Card className="legal-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Brain className="h-5 w-5 text-legal-primary animate-pulse" />
+          AI Analysis in Progress
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-legal-primary mx-auto mb-4"></div>
+              <p className="text-sm text-muted-foreground">
+                Analyzing uploaded files and extracting key information...
+              </p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderBriefingPhase = () => {
+    if (!session) return null;
+
+    return (
+      <Card className="legal-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-legal-primary" />
+            AI Analysis Complete - Ready for Verification
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Important Legal Notice:</strong> I am your AI legal
+              assistant, not your lawyer. I provide legal information and help
+              organize your case, but YOU are the final authority on all facts
+              and legal decisions. This is your case, and you are representing
+              yourself.
+            </AlertDescription>
+          </Alert>
+
+          <div className="bg-muted p-4 rounded-lg">
+            <h3 className="font-semibold mb-3">📊 Analysis Summary</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="font-medium">📅 Facts Extracted</div>
+                <div className="text-2xl font-bold text-legal-primary">
+                  {session.extractedFacts.length}
+                </div>
+              </div>
+              <div>
+                <div className="font-medium">👥 People Identified</div>
+                <div className="text-2xl font-bold text-legal-primary">
+                  {session.extractedPersons.length}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm">
+              <strong>Next Step:</strong> I need to verify each fact with you.
+              For each one, I will:
+            </p>
+            <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+              <li>• Show you what I found</li>
+              <li>• Translate any emotional language into legal terms</li>
+              <li>• Educate you on relevant legal concepts</li>
+              <li>• Help you create an accurate, legally-sound fact</li>
+            </ul>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              onClick={() =>
+                setSession((prev) => ({ ...prev!, phase: "verification" }))
+              }
+              className="flex-1"
+            >
+              ✓ I Understand - Begin Verification
+            </Button>
+            <Button variant="outline" onClick={() => setSession(null)}>
+              Cancel
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderVerificationPhase = () => {
+    if (!session || session.extractedFacts.length === 0) return null;
+
+    const currentFact = session.extractedFacts[session.currentFactIndex];
+    const progress =
+      (session.currentFactIndex / session.extractedFacts.length) * 100;
+
+    return (
+      <Card className="legal-card">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-legal-primary" />
+              Verifying Fact #{session.currentFactIndex + 1}
+            </div>
+            <Badge variant="outline">
+              {session.currentFactIndex + 1} of {session.extractedFacts.length}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Progress value={progress} className="w-full" />
+
+          {/* Original Statement */}
+          <div className="bg-muted p-4 rounded-lg">
+            <h4 className="font-semibold mb-2">
+              📝 What I Found in Your Files:
+            </h4>
+            <p className="text-sm italic">"{currentFact.description}"</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Source: {currentFact.source} | Confidence:{" "}
+              {currentFact.confidence}
+            </p>
+          </div>
+
+          {/* Legal Concept Translation */}
+          {currentFact.legalConcepts &&
+            currentFact.legalConcepts.length > 0 && (
+              <div className="border border-legal-border p-4 rounded-lg">
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <Scale className="h-4 w-4" />
+                  Legal Concept Detected
+                </h4>
+                <div className="space-y-2">
+                  {currentFact.legalConcepts.map((concept, index) => (
+                    <div key={index}>
+                      <Badge className="mb-2">{concept}</Badge>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => setCurrentEducationTopic(concept)}
+                        className="ml-2 p-0 h-auto"
+                      >
+                        📚 Learn About This
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          {/* Education Section */}
+          {currentEducationTopic && (
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Legal Education: {currentEducationTopic}
+              </h4>
+              <div className="prose prose-sm max-w-none">
+                {educateOnConcept(currentEducationTopic)
+                  .split("\n")
+                  .map((line, i) => (
+                    <p key={i} className="mb-2">
+                      {line}
+                    </p>
+                  ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentEducationTopic(null)}
+                className="mt-2"
+              >
+                Got It
+              </Button>
+            </div>
+          )}
+
+          {/* Translation */}
+          {currentFact.originalLanguage && (
+            <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+              <h4 className="font-semibold mb-2">
+                🔄 Legal Language Translation
+              </h4>
+              <div className="space-y-2">
+                <p className="text-sm">
+                  <strong>Your Words:</strong> "{currentFact.originalLanguage}"
+                </p>
+                <p className="text-sm">
+                  <strong>Legal Translation:</strong> "
+                  {translateEmotionalLanguage(currentFact.originalLanguage)}"
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Courts prefer objective, factual language over emotional
+                  descriptions.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Fact Editor */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Edit this fact if needed:
+            </label>
+            <Textarea
+              value={userInput || currentFact.description}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder="Edit the fact description..."
+              className="min-h-[100px]"
+            />
+          </div>
+
+          {/* Verification Buttons */}
+          <div className="flex gap-2">
+            <Button
+              onClick={() => verifyCurrentFact(true, userInput || undefined)}
+              className="flex-1"
+            >
+              <Check className="h-4 w-4 mr-2" />✓ Approve & Add to Timeline
+            </Button>
+            <Button variant="outline" onClick={() => verifyCurrentFact(false)}>
+              <X className="h-4 w-4 mr-2" />
+              Skip This Fact
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground text-center">
+            💡 You can always edit facts later in your Timeline tab
+          </p>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderCompletionPhase = () => (
+    <Card className="legal-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CheckCircle className="h-5 w-5 text-green-600" />
+          Verification Complete!
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="text-center py-6">
+          <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Excellent Work!</h3>
+          <p className="text-muted-foreground mb-4">
+            You've successfully verified {session?.verifiedFacts.length} facts
+            and built the foundation of your legal case.
+          </p>
+        </div>
+
+        <div className="bg-muted p-4 rounded-lg">
+          <h4 className="font-semibold mb-2">📈 What's Next:</h4>
+          <ul className="text-sm space-y-1">
+            <li>• Review your Timeline tab to see all verified facts</li>
+            <li>• Check the Evidence tab to link files to specific facts</li>
+            <li>
+              • Visit Persons & Entities to verify the people I identified
+            </li>
+            <li>• Continue building your case with additional evidence</li>
+          </ul>
+        </div>
+
+        <Button onClick={() => setSession(null)} className="w-full">
+          🎯 Continue Building My Case
+        </Button>
+      </CardContent>
+    </Card>
+  );
+
+  if (isProcessing) {
+    return renderAnalysisPhase();
+  }
+
+  if (!session) {
+    return (
+      <Card className="legal-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="h-5 w-5 text-legal-primary" />
+            AI Counsel Interview Engine
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <Sparkles className="h-12 w-12 text-legal-primary mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">
+              Ready to Analyze Your Case
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              Upload files in the Dashboard tab, and I'll automatically start
+              the verification process to help you build a strong legal case.
+            </p>
+            <Button
+              onClick={initiateAnalysisSession}
+              disabled={case_.evidence.length === 0}
+            >
+              🔍 Start AI Analysis
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  switch (session.phase) {
+    case "briefing":
+      return renderBriefingPhase();
+    case "verification":
+      return renderVerificationPhase();
+    case "completion":
+      return renderCompletionPhase();
+    default:
+      return null;
+  }
+}
