@@ -252,6 +252,11 @@ export default function CaseWorkspace() {
         {/* Sidebar Content (for AI persona settings, etc.) */}
         {renderSidebarContent()}
 
+        {/* Quick Actions */}
+        <div className="px-2">
+          <QuickActions onTabChange={setActiveTab} />
+        </div>
+
         {/* Quick Stats */}
         <div className="p-4 border-t border-legal-border">
           <div className="grid grid-cols-2 gap-2 text-xs">
