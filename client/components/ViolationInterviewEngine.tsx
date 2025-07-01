@@ -370,11 +370,14 @@ export default function ViolationInterviewEngine({
   ]);
 
   const handleViolationSelection = (violationId: string) => {
-    if (selectedViolations.includes(violationId)) {
-      setSelectedViolations((prev) => prev.filter((id) => id !== violationId));
-    } else {
-      setSelectedViolations((prev) => [...prev, violationId]);
-    }
+    console.log("Violation clicked:", violationId);
+    setSelectedViolations((prev) => {
+      const newSelections = prev.includes(violationId)
+        ? prev.filter((id) => id !== violationId)
+        : [...prev, violationId];
+      console.log("Updated selections:", newSelections);
+      return newSelections;
+    });
   };
 
   const startInterview = () => {
