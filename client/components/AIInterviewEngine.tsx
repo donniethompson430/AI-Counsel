@@ -179,12 +179,18 @@ export default function AIInterviewEngine({
     source: string,
   ): ExtractedFact[] => {
     const facts: ExtractedFact[] = [];
-    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 10);
+
+    // Clean and filter the text first
+    const cleanedText = cleanExtractedText(text);
+    if (!cleanedText || cleanedText.length < 50) return facts;
+
+    const sentences = cleanedText
+      .split(/[.!?]+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 20 && s.length < 500) // Reasonable sentence lengths
+      .filter((s) => isReadableText(s)); // Filter out gibberish
 
     sentences.forEach((sentence, index) => {
-      const trimmed = sentence.trim();
-      if (trimmed.length < 20) return;
-
       // Look for action verbs and temporal indicators
       const actionWords = [
         "pulled",
@@ -203,20 +209,50 @@ export default function AIInterviewEngine({
         "shot",
         "tased",
         "handcuffed",
+        "approached",
+        "called",
+        "responded",
+        "issued",
+        "wrote",
+        "documented",
+        "observed",
+        "witnessed",
+        "occurred",
       ];
+
       const hasAction = actionWords.some((word) =>
-        trimmed.toLowerCase().includes(word),
+        sentence.toLowerCase().includes(word),
       );
 
-      if (hasAction) {
+      // Look for legal/police terminology to increase relevance
+      const legalTerms = [
+        "officer",
+        "police",
+        "arrest",
+        "citation",
+        "violation",
+        "suspect",
+        "defendant",
+        "plaintiff",
+        "court",
+        "judge",
+        "attorney",
+        "law",
+      ];
+
+      const hasLegalTerm = legalTerms.some((term) =>
+        sentence.toLowerCase().includes(term),
+      );
+
+      if (hasAction || hasLegalTerm) {
         // Try to extract date from context
-        const dateMatch = trimmed.match(
-          /(\d{1,2}\/\d{1,2}\/\d{4}|\d{1,2}-\d{1,2}-\d{4}|January|February|March|April|May|June|July|August|September|October|November|December)/i,
+        const dateMatch = sentence.match(
+          /(\d{1,2}\/\d{1,2}\/\d{4}|\d{1,2}-\d{1,2}-\d{4}|January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}/i,
         );
         const estimatedDate = dateMatch ? new Date(dateMatch[0]) : new Date();
 
         // Detect legal concepts
-        const legalConcepts = detectLegalConcepts(trimmed);
+        const legalConcepts = detectLegalConcepts(sentence);
 
         // Determine if emotional language needs translation
         const emotionalWords = [
@@ -228,55 +264,86 @@ export default function AIInterviewEngine({
           "terrified",
           "scared",
           "humiliated",
+          "rough",
+          "aggressive",
         ];
         const needsTranslation = emotionalWords.some((word) =>
-          trimmed.toLowerCase().includes(word),
+          sentence.toLowerCase().includes(word),
         );
 
         facts.push({
           id: `fact-${Date.now()}-${index}`,
-          description: trimmed,
+          description: sentence,
           date: estimatedDate,
           source,
           verified: false,
           legalConcepts,
-          originalLanguage: needsTranslation ? trimmed : undefined,
-          confidence: hasAction && dateMatch ? "high" : "medium",
+          originalLanguage: needsTranslation ? sentence : undefined,
+          confidence: hasAction && hasLegalTerm ? "high" : "medium",
           type: "event",
         });
       }
     });
 
-    return facts;
+    // Limit to most relevant facts (max 20)
+    return facts.slice(0, 20);
   };
 
   const extractPersonsFromFiles = async (): Promise<ExtractedPerson[]> => {
     const persons: ExtractedPerson[] = [];
-    const namePattern = /\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g;
-    const officerPattern = /Officer\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/gi;
+    const seenNames = new Set<string>();
 
     for (const evidence of case_.evidence) {
       if (evidence.extractedText) {
-        // Extract officer names
-        let match;
-        while ((match = officerPattern.exec(evidence.extractedText)) !== null) {
-          persons.push({
-            id: `person-${Date.now()}-${match[1]}`,
-            name: match[1],
-            role: "Police Officer",
-            source: evidence.fileName,
-            verified: false,
-            confidence: "high",
-          });
-        }
+        const cleanedText = cleanExtractedText(evidence.extractedText);
+        if (!cleanedText) continue;
 
-        // Extract general names
-        const names = evidence.extractedText.match(namePattern) || [];
+        // Extract officer names with specific patterns
+        const officerPatterns = [
+          /Officer\s+([A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)/gi,
+          /Detective\s+([A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)/gi,
+          /Sergeant\s+([A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)/gi,
+          /Lieutenant\s+([A-Z][a-z]{2,15}(?:\s+[A-Z][a-z]{2,15})?)/gi,
+        ];
+
+        officerPatterns.forEach((pattern) => {
+          let match;
+          while ((match = pattern.exec(cleanedText)) !== null) {
+            const name = match[1].trim();
+            if (
+              name &&
+              !seenNames.has(name.toLowerCase()) &&
+              isValidPersonName(name)
+            ) {
+              seenNames.add(name.toLowerCase());
+              persons.push({
+                id: `person-${Date.now()}-${name.replace(/\s+/g, "-")}`,
+                name,
+                role: "Police Officer",
+                source: evidence.fileName,
+                verified: false,
+                confidence: "high",
+              });
+            }
+          }
+        });
+
+        // Extract general names more carefully
+        const namePattern = /\b[A-Z][a-z]{2,15}\s+[A-Z][a-z]{2,15}\b/g;
+        const names = cleanedText.match(namePattern) || [];
+
         names.forEach((name) => {
-          if (!persons.some((p) => p.name === name) && !isCommonPhrase(name)) {
+          const normalizedName = name.trim();
+          if (
+            !seenNames.has(normalizedName.toLowerCase()) &&
+            isValidPersonName(normalizedName) &&
+            !isCommonPhrase(normalizedName) &&
+            isInLegalContext(normalizedName, cleanedText)
+          ) {
+            seenNames.add(normalizedName.toLowerCase());
             persons.push({
-              id: `person-${Date.now()}-${name}`,
-              name,
+              id: `person-${Date.now()}-${normalizedName.replace(/\s+/g, "-")}`,
+              name: normalizedName,
               role: "Unknown",
               source: evidence.fileName,
               verified: false,
@@ -287,7 +354,10 @@ export default function AIInterviewEngine({
       }
     }
 
-    return persons;
+    // Limit to reasonable number and sort by confidence
+    return persons
+      .sort((a, b) => (a.confidence === "high" ? -1 : 1))
+      .slice(0, 10);
   };
 
   const detectLegalConcepts = (text: string): string[] => {
@@ -314,6 +384,101 @@ export default function AIInterviewEngine({
     return concepts;
   };
 
+  const cleanExtractedText = (text: string): string => {
+    if (!text) return "";
+
+    return (
+      text
+        // Remove excessive whitespace and newlines
+        .replace(/\s+/g, " ")
+        // Remove control characters and non-printable characters
+        .replace(/[\x00-\x1F\x7F-\x9F]/g, "")
+        // Remove obvious OCR artifacts and gibberish patterns
+        .replace(/[^\w\s.,!?;:()'"'-]/g, " ")
+        // Remove sequences of repeated characters that are likely OCR errors
+        .replace(/(.)\1{4,}/g, "$1")
+        // Remove standalone single characters that are likely OCR noise
+        .replace(/\b\w\b/g, " ")
+        // Clean up multiple spaces
+        .replace(/\s+/g, " ")
+        .trim()
+    );
+  };
+
+  const isReadableText = (text: string): boolean => {
+    if (!text || text.length < 10) return false;
+
+    // Check ratio of alphabetic characters to total characters
+    const alphaCount = (text.match(/[a-zA-Z]/g) || []).length;
+    const alphaRatio = alphaCount / text.length;
+
+    // Check for reasonable word structure
+    const words = text.split(/\s+/).filter((w) => w.length > 1);
+    const validWords = words.filter(
+      (w) => /^[a-zA-Z]+$/.test(w) && w.length <= 20,
+    );
+    const wordRatio = validWords.length / Math.max(words.length, 1);
+
+    return alphaRatio > 0.7 && wordRatio > 0.5 && words.length >= 3;
+  };
+
+  const isValidPersonName = (name: string): boolean => {
+    if (!name || name.length < 4 || name.length > 50) return false;
+
+    const parts = name.split(/\s+/);
+    if (parts.length < 2 || parts.length > 4) return false;
+
+    // Each part should be a reasonable name component
+    return parts.every(
+      (part) =>
+        /^[A-Z][a-z]{1,15}$/.test(part) &&
+        part.length >= 2 &&
+        part.length <= 15,
+    );
+  };
+
+  const isInLegalContext = (name: string, fullText: string): boolean => {
+    const contextWindow = 100; // characters before and after
+    const nameIndex = fullText.toLowerCase().indexOf(name.toLowerCase());
+    if (nameIndex === -1) return false;
+
+    const start = Math.max(0, nameIndex - contextWindow);
+    const end = Math.min(
+      fullText.length,
+      nameIndex + name.length + contextWindow,
+    );
+    const context = fullText.slice(start, end).toLowerCase();
+
+    const legalContextWords = [
+      "officer",
+      "detective",
+      "sergeant",
+      "lieutenant",
+      "police",
+      "cop",
+      "defendant",
+      "plaintiff",
+      "witness",
+      "victim",
+      "suspect",
+      "attorney",
+      "lawyer",
+      "judge",
+      "court",
+      "arrest",
+      "citation",
+      "ticket",
+      "violation",
+      "report",
+      "incident",
+      "case",
+      "complaint",
+      "statement",
+    ];
+
+    return legalContextWords.some((word) => context.includes(word));
+  };
+
   const isCommonPhrase = (text: string): boolean => {
     const common = [
       "United States",
@@ -321,6 +486,21 @@ export default function AIInterviewEngine({
       "District Court",
       "Supreme Court",
       "State Police",
+      "County Sheriff",
+      "City Hall",
+      "Fire Department",
+      "Emergency Services",
+      "Public Safety",
+      "Motor Vehicle",
+      "Traffic Court",
+      "Justice Department",
+      "Law Enforcement",
+      "Public Records",
+      "Case Number",
+      "File Number",
+      "Report Number",
+      "Badge Number",
+      "License Number",
     ];
     return common.some((phrase) => text.includes(phrase));
   };
