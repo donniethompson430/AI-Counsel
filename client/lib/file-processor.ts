@@ -33,8 +33,10 @@ export class FileProcessor {
     "audio/wav",
     "audio/mp3",
     "text/plain",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword", // .doc files
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx files
+    "application/rtf", // Rich Text Format
+    "application/vnd.oasis.opendocument.text", // OpenDocument Text
   ];
 
   static async processFile(file: File): Promise<ProcessedFile> {
@@ -64,6 +66,8 @@ export class FileProcessor {
         await this.processAudio(file, result);
       } else if (file.type.startsWith("text/")) {
         await this.processText(file, result);
+      } else if (this.isWordDocument(file.type)) {
+        await this.processWordDocument(file, result);
       } else {
         result.metadata = {
           extractedText: "Binary file - content not extractable",
@@ -208,6 +212,55 @@ export class FileProcessor {
     result.metadata.extractedText = text;
   }
 
+  private static isWordDocument(fileType: string): boolean {
+    return [
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/rtf",
+      "application/vnd.oasis.opendocument.text",
+    ].includes(fileType);
+  }
+
+  private static async processWordDocument(
+    file: File,
+    result: ProcessedFile,
+  ): Promise<void> {
+    try {
+      // For DOC/DOCX files, we'll attempt basic text extraction
+      // Note: Full DOC/DOCX parsing would require additional libraries
+      // For now, we'll provide a placeholder that encourages TXT format
+
+      if (
+        file.type === "application/msword" ||
+        file.type ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
+        result.content = `Word Document: ${file.name}`;
+        result.metadata.extractedText = `📄 Word Document Uploaded: ${file.name}
+
+⚠️ **Note:** For better text extraction, please save your document as a .TXT file and re-upload.
+
+To convert:
+1. Open your document in Microsoft Word
+2. Go to File → Save As
+3. Choose "Plain Text (*.txt)" as the file type
+4. Save and upload the .TXT version
+
+This will allow the AI to properly analyze your content and extract meaningful facts for your case.`;
+
+        result.metadata.pageCount = 1; // Placeholder
+      } else {
+        // For other document types, attempt basic text extraction
+        const text = await file.text();
+        result.content = text;
+        result.metadata.extractedText = text;
+      }
+    } catch (error) {
+      result.content = `Document: ${file.name} (processing error)`;
+      result.metadata.extractedText = `Unable to extract text from ${file.name}. Please convert to .TXT format for better processing.`;
+    }
+  }
+
   private static extractCommonMetadata(result: ProcessedFile): void {
     if (result.content || result.metadata.extractedText) {
       const text = result.content || result.metadata.extractedText || "";
@@ -326,7 +379,7 @@ export class FileProcessor {
     if (!this.SUPPORTED_TYPES.includes(file.type)) {
       return {
         valid: false,
-        error: `File type ${file.type} not supported`,
+        error: `File type ${file.type} not supported. Supported: PDF, TXT, DOC, DOCX, Images, Videos, Audio`,
       };
     }
 
@@ -335,10 +388,16 @@ export class FileProcessor {
 
   static getFileIcon(fileType: string): string {
     if (fileType.includes("pdf")) return "📄";
+    if (
+      fileType.includes("msword") ||
+      fileType.includes("wordprocessingml") ||
+      fileType.includes("rtf")
+    )
+      return "📝";
+    if (fileType.includes("text")) return "📄";
     if (fileType.includes("image")) return "🖼️";
     if (fileType.includes("video")) return "🎥";
     if (fileType.includes("audio")) return "🎵";
-    if (fileType.includes("text")) return "📝";
     return "📎";
   }
 }
