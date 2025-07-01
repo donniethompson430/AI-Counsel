@@ -30,7 +30,7 @@ import SourcesTab from "@/components/workspace/SourcesTab";
 import DocumentsTab from "@/components/workspace/DocumentsTab";
 import DeadlinesTab from "@/components/workspace/DeadlinesTab";
 import NotesTab from "@/components/workspace/NotesTab";
-import AIInterview from "@/components/AIInterview";
+import AIInterviewEngine from "@/components/AIInterviewEngine";
 
 type TabType =
   | "ai"
@@ -108,7 +108,7 @@ export default function CaseWorkspace() {
 
     switch (activeTab) {
       case "ai":
-        return <AIInterview case={case_} onCaseUpdate={setCase} />;
+        return <AIInterviewEngine case={case_} onCaseUpdate={setCase} />;
       case "dashboard":
         return <DashboardTab case={case_} onCaseUpdate={setCase} />;
       case "timeline":

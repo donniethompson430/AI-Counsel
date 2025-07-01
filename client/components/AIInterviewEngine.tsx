@@ -98,12 +98,16 @@ export default function AIInterviewEngine({
 
   // Monitor for new file uploads to trigger analysis
   useEffect(() => {
-    const lastEvidence = case_.evidence[case_.evidence.length - 1];
-    if (lastEvidence && !session) {
-      console.log("New file detected, starting AI analysis...");
-      initiateAnalysisSession();
+    if (case_.evidence.length > 0 && !session) {
+      console.log("Files detected, ready to start AI analysis...");
+      // Auto-start analysis if files exist but no session is active
+      setTimeout(() => {
+        if (!session) {
+          initiateAnalysisSession();
+        }
+      }, 1000);
     }
-  }, [case_.evidence.length]);
+  }, [case_.evidence.length, session]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -374,9 +378,9 @@ export default function AIInterviewEngine({
   const educateOnConcept = (concept: string): string => {
     const education: Record<string, string> = {
       "Excessive Force": `**Excessive Force** under the Fourth Amendment is analyzed using the "objective reasonableness" standard from Graham v. Connor. The court considers:
-      
+
 • **Severity of the crime** - Was this a serious offense or minor violation?
-• **Immediate threat** - Did you pose a threat to officer or public safety?  
+• **Immediate threat** - Did you pose a threat to officer or public safety?
 • **Active resistance** - Were you resisting arrest or attempting to flee?
 
 The force must be reasonable from the perspective of a reasonable officer at the scene, not with 20/20 hindsight.`,
@@ -616,17 +620,77 @@ The force must be reasonable from the perspective of a reasonable officer at the
             </div>
           )}
 
+          {/* Guided Questions for Legal Elements */}
+          {currentFact.legalConcepts &&
+            currentFact.legalConcepts.includes("Excessive Force") && (
+              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                <h4 className="font-semibold mb-3">
+                  📋 Guided Questions for Excessive Force Claim
+                </h4>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <p className="font-medium">
+                      1. Regarding the Suspected Crime:
+                    </p>
+                    <p className="text-muted-foreground">
+                      What was the stated reason for the stop/arrest?
+                    </p>
+                    <Input
+                      placeholder="e.g., Expired registration, speeding, etc."
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-medium">
+                      2. Regarding Any Potential Threat:
+                    </p>
+                    <p className="text-muted-foreground">
+                      Before force was used, did you make any threats or sudden
+                      movements?
+                    </p>
+                    <Input
+                      placeholder="e.g., I was cooperative, just asked questions"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-medium">3. Regarding Resistance:</p>
+                    <p className="text-muted-foreground">
+                      Were you physically resisting or just verbally
+                      questioning?
+                    </p>
+                    <Input
+                      placeholder="e.g., I just asked why I had to get out"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  💡 These answers help structure your fact to address the legal
+                  elements courts examine.
+                </p>
+              </div>
+            )}
+
           {/* Fact Editor */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Edit this fact if needed:
+              Proposed Legal Fact (edit as needed):
             </label>
             <Textarea
-              value={userInput || currentFact.description}
+              value={
+                userInput ||
+                (currentFact.originalLanguage
+                  ? translateEmotionalLanguage(currentFact.description)
+                  : currentFact.description)
+              }
               onChange={(e) => setUserInput(e.target.value)}
               placeholder="Edit the fact description..."
               className="min-h-[100px]"
             />
+            <p className="text-xs text-muted-foreground">
+              This will be added to your official timeline as a verified fact.
+            </p>
           </div>
 
           {/* Verification Buttons */}
@@ -682,7 +746,7 @@ The force must be reasonable from the perspective of a reasonable officer at the
         </div>
 
         <Button onClick={() => setSession(null)} className="w-full">
-          🎯 Continue Building My Case
+          �� Continue Building My Case
         </Button>
       </CardContent>
     </Card>

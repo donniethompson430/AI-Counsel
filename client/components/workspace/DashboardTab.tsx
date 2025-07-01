@@ -18,6 +18,7 @@ import { Case, EvidenceFile } from "@shared/types";
 import { CaseManager } from "@/lib/case-management";
 import { FileProcessor } from "@/lib/file-processor";
 import { toast } from "@/hooks/use-toast";
+import VerificationCenter from "@/components/VerificationCenter";
 
 interface DashboardTabProps {
   case: Case;
@@ -92,7 +93,7 @@ export default function DashboardTab({
 
           toast({
             title: "File Processed Successfully",
-            description: `${file.name} - AI analysis complete! Check AI Counsel tab for live feedback.`,
+            description: `${file.name} - Ready for AI verification! Switch to AI Counsel tab to begin the interview process.`,
           });
         } catch (error) {
           toast({
