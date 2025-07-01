@@ -202,23 +202,22 @@ export default function RightSidebar({
           <div className="space-y-2">
             {nodes.map((node, index) => {
               const Icon = getNodeIcon(node.type);
+              const label = node.label || "Unlabeled";
               return (
                 <div
                   key={node.id}
                   className={`
-                    inline-block px-2 py-1 m-1 rounded-full text-xs border
-                    ${getNodeColor(node.type)}
-                    hover:shadow-sm transition-all cursor-pointer
-                  `}
+                      inline-block px-2 py-1 m-1 rounded-full text-xs border
+                      ${getNodeColor(node.type)}
+                      hover:shadow-sm transition-all cursor-pointer
+                    `}
                   style={{
                     transform: `translate(${(index % 5) * 60}px, ${Math.floor(index / 5) * 40}px)`,
                     position: "absolute",
                   }}
                 >
                   <Icon className="h-3 w-3 inline mr-1" />
-                  {node.label.length > 10
-                    ? `${node.label.substring(0, 10)}...`
-                    : node.label}
+                  {label.length > 10 ? `${label.substring(0, 10)}...` : label}
                 </div>
               );
             })}
