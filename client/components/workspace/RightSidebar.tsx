@@ -66,39 +66,41 @@ export default function RightSidebar({
     const newConnections: Connection[] = [];
 
     // Add person nodes
-    case_.persons.forEach((person) => {
+    case_.persons?.forEach((person) => {
       newNodes.push({
         id: person.id,
         type: "person",
-        label: person.name,
+        label: person.name || "Unknown Person",
         connections: [],
         strength: Math.random() * 100,
       });
     });
 
     // Add evidence nodes
-    case_.evidence.forEach((evidence) => {
+    case_.evidence?.forEach((evidence) => {
       newNodes.push({
         id: evidence.id,
         type: "evidence",
-        label: evidence.name,
+        label: evidence.name || "Unknown Evidence",
         connections: [],
         strength: Math.random() * 100,
       });
     });
 
     // Add fact nodes
-    case_.timeline.slice(-10).forEach((fact) => {
+    case_.timeline?.slice(-10).forEach((fact) => {
       newNodes.push({
         id: fact.id,
         type: "fact",
-        label: `Fact ${fact.factNumber}`,
-        connections: fact.linkedPersonIds.concat(fact.linkedEvidenceIds),
+        label: `Fact ${fact.factNumber || "Unknown"}`,
+        connections: (fact.linkedPersonIds || []).concat(
+          fact.linkedEvidenceIds || [],
+        ),
         strength: Math.random() * 100,
       });
 
       // Create connections for facts
-      fact.linkedPersonIds.forEach((personId) => {
+      (fact.linkedPersonIds || []).forEach((personId) => {
         newConnections.push({
           from: fact.id,
           to: personId,
@@ -107,7 +109,7 @@ export default function RightSidebar({
         });
       });
 
-      fact.linkedEvidenceIds.forEach((evidenceId) => {
+      (fact.linkedEvidenceIds || []).forEach((evidenceId) => {
         newConnections.push({
           from: fact.id,
           to: evidenceId,
