@@ -274,25 +274,25 @@ export default function RightSidebar({
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-blue-50 p-3 rounded-lg text-center">
           <div className="text-lg font-bold text-blue-600">
-            {case_.timeline.length}
+            {case_.timeline?.length || 0}
           </div>
           <div className="text-xs text-blue-800">Facts</div>
         </div>
         <div className="bg-green-50 p-3 rounded-lg text-center">
           <div className="text-lg font-bold text-green-600">
-            {case_.evidence.length}
+            {case_.evidence?.length || 0}
           </div>
           <div className="text-xs text-green-800">Evidence</div>
         </div>
         <div className="bg-purple-50 p-3 rounded-lg text-center">
           <div className="text-lg font-bold text-purple-600">
-            {case_.persons.length}
+            {case_.persons?.length || 0}
           </div>
           <div className="text-xs text-purple-800">People</div>
         </div>
         <div className="bg-orange-50 p-3 rounded-lg text-center">
           <div className="text-lg font-bold text-orange-600">
-            {case_.deadlines.filter((d) => !d.completed).length}
+            {case_.deadlines?.filter((d) => !d.completed).length || 0}
           </div>
           <div className="text-xs text-orange-800">Deadlines</div>
         </div>
