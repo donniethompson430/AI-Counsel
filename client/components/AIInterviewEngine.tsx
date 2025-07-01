@@ -171,21 +171,26 @@ export default function AIInterviewEngine({
       }
     }
 
-    // If no valid facts were extracted, create a helpful placeholder
-    if (facts.length === 0 && case_.evidence.length > 0) {
-      facts.push({
-        id: `manual-fact-${Date.now()}`,
-        description:
-          "No extractable text found in uploaded files. Click 'Edit Further' to manually describe what happened.",
-        date: new Date(),
-        source: "Manual Entry Needed",
-        verified: false,
-        confidence: "low",
-        type: "statement",
-      });
+    // Filter out gibberish facts and limit to most relevant (max 20)
+    const validFacts = facts.filter((fact) => !isGibberish(fact.description));
+
+    // If no valid facts were extracted, create helpful placeholders
+    if (validFacts.length === 0 && case_.evidence.length > 0) {
+      return [
+        {
+          id: `manual-fact-${Date.now()}`,
+          description:
+            "No readable text could be extracted from your files. Please describe the key events manually.",
+          date: new Date(),
+          source: "Manual Entry Needed",
+          verified: false,
+          confidence: "low",
+          type: "statement",
+        },
+      ];
     }
 
-    return facts;
+    return validFacts.slice(0, 20);
   };
 
   const extractEventsFromText = (
@@ -299,8 +304,9 @@ export default function AIInterviewEngine({
       }
     });
 
-    // Limit to most relevant facts (max 20)
-    return facts.slice(0, 20);
+    // Filter out gibberish facts and limit to most relevant (max 20)
+    const validFacts = facts.filter((fact) => !isGibberish(fact.description));
+    return validFacts.slice(0, 20);
   };
 
   const extractPersonsFromFiles = async (): Promise<ExtractedPerson[]> => {
@@ -791,30 +797,34 @@ The force must be reasonable from the perspective of a reasonable officer at the
   const renderVerificationPhase = () => {
     if (!session || session.extractedFacts.length === 0) return null;
 
-    const currentFact = session.extractedFacts[session.currentFactIndex];
-    const progress =
-      (session.currentFactIndex / session.extractedFacts.length) * 100;
+    // Check if session contains gibberish facts and restart if needed
+    const hasGibberishFacts = session.extractedFacts.some(
+      (fact) =>
+        isGibberish(fact.description) && fact.source !== "Manual Entry Needed",
+    );
 
-    // Check if current fact looks like gibberish
-    const isCurrentFactGibberish = isGibberish(currentFact.description);
+    if (hasGibberishFacts) {
+      console.log("Session contains gibberish facts, restarting analysis...");
+      setTimeout(() => {
+        setSession(null);
+        initiateAnalysisSession();
+      }, 100);
 
-    // Auto-skip gibberish facts
-    if (
-      isCurrentFactGibberish &&
-      currentFact.source !== "Manual Entry Needed"
-    ) {
-      setTimeout(() => verifyCurrentFact(false), 100);
       return (
         <Card className="legal-card">
           <CardContent className="p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legal-primary mx-auto mb-4"></div>
             <p className="text-sm text-muted-foreground">
-              Skipping corrupted text extraction...
+              Filtering corrupted text and restarting analysis...
             </p>
           </CardContent>
         </Card>
       );
     }
+
+    const currentFact = session.extractedFacts[session.currentFactIndex];
+    const progress =
+      (session.currentFactIndex / session.extractedFacts.length) * 100;
 
     return (
       <Card className="legal-card">
@@ -833,15 +843,30 @@ The force must be reasonable from the perspective of a reasonable officer at the
           <Progress value={progress} className="w-full" />
 
           {/* Original Statement */}
-          <div className="bg-muted p-4 rounded-lg">
+          <div
+            className={`p-4 rounded-lg ${
+              currentFact.source === "Manual Entry Needed"
+                ? "bg-blue-50 border border-blue-200"
+                : "bg-muted"
+            }`}
+          >
             <h4 className="font-semibold mb-2">
-              📝 What I Found in Your Files:
+              {currentFact.source === "Manual Entry Needed"
+                ? "📝 Manual Entry Required:"
+                : "📝 What I Found in Your Files:"}
             </h4>
             <p className="text-sm italic">"{currentFact.description}"</p>
             <p className="text-xs text-muted-foreground mt-2">
               Source: {currentFact.source} | Confidence:{" "}
               {currentFact.confidence}
             </p>
+            {currentFact.source === "Manual Entry Needed" && (
+              <div className="mt-2 p-2 bg-blue-100 rounded text-xs text-blue-800">
+                💡 <strong>Tip:</strong> Use the text area below to describe
+                what happened in your own words. I'll help you convert it to
+                proper legal language.
+              </div>
+            )}
           </div>
 
           {/* Legal Concept Translation */}
