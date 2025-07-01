@@ -171,6 +171,20 @@ export default function AIInterviewEngine({
       }
     }
 
+    // If no valid facts were extracted, create a helpful placeholder
+    if (facts.length === 0 && case_.evidence.length > 0) {
+      facts.push({
+        id: `manual-fact-${Date.now()}`,
+        description:
+          "No extractable text found in uploaded files. Click 'Edit Further' to manually describe what happened.",
+        date: new Date(),
+        source: "Manual Entry Needed",
+        verified: false,
+        confidence: "low",
+        type: "statement",
+      });
+    }
+
     return facts;
   };
 
@@ -387,6 +401,11 @@ export default function AIInterviewEngine({
   const cleanExtractedText = (text: string): string => {
     if (!text) return "";
 
+    // First, check if this looks like gibberish
+    if (isGibberish(text)) {
+      return "";
+    }
+
     return (
       text
         // Remove excessive whitespace and newlines
@@ -405,8 +424,50 @@ export default function AIInterviewEngine({
     );
   };
 
+  const isGibberish = (text: string): boolean => {
+    if (!text || text.length < 5) return true;
+
+    // Check for common OCR gibberish patterns
+    const gibberishPatterns = [
+      /[A-Z]{3,}[a-z]{1,2}[A-Z]{2,}/g, // Mixed case nonsense like "GitcTOT1"
+      /\b\w{1,3}[0-9]+[A-Z]+\w*\b/g, // Alphanumeric gibberish
+      /\b[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]{4,}\b/g, // Too many consonants
+      /[A-Z]{2,}[0-9]+[A-Z]{2,}/g, // Pattern like "JD QjeVr5"
+    ];
+
+    const hasGibberishPattern = gibberishPatterns.some((pattern) =>
+      pattern.test(text),
+    );
+    if (hasGibberishPattern) return true;
+
+    // Check vowel ratio (real text should have reasonable vowels)
+    const vowelCount = (text.match(/[aeiouAEIOU]/g) || []).length;
+    const letterCount = (text.match(/[a-zA-Z]/g) || []).length;
+    const vowelRatio = vowelCount / Math.max(letterCount, 1);
+
+    if (vowelRatio < 0.15 || vowelRatio > 0.6) return true;
+
+    // Check for random character sequences
+    const words = text.split(/\s+/).filter((w) => w.length > 2);
+    const validWords = words.filter((w) => {
+      // Must be mostly letters, reasonable length, and have vowels
+      return (
+        /^[a-zA-Z]+$/.test(w) &&
+        w.length <= 20 &&
+        /[aeiou]/i.test(w) &&
+        !/[bcdfghjklmnpqrstvwxyz]{4,}/i.test(w) // No 4+ consonants in a row
+      );
+    });
+
+    const validWordRatio = validWords.length / Math.max(words.length, 1);
+    return validWordRatio < 0.6;
+  };
+
   const isReadableText = (text: string): boolean => {
     if (!text || text.length < 10) return false;
+
+    // Quick gibberish check
+    if (isGibberish(text)) return false;
 
     // Check ratio of alphabetic characters to total characters
     const alphaCount = (text.match(/[a-zA-Z]/g) || []).length;
@@ -670,7 +731,11 @@ The force must be reasonable from the perspective of a reasonable officer at the
               <div>
                 <div className="font-medium">📅 Facts Extracted</div>
                 <div className="text-2xl font-bold text-legal-primary">
-                  {session.extractedFacts.length}
+                  {
+                    session.extractedFacts.filter(
+                      (f) => !isGibberish(f.description),
+                    ).length
+                  }
                 </div>
               </div>
               <div>
@@ -680,6 +745,16 @@ The force must be reasonable from the perspective of a reasonable officer at the
                 </div>
               </div>
             </div>
+            {session.extractedFacts.length === 0 && (
+              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  📄 <strong>Note:</strong> No readable text could be extracted
+                  from your uploaded files. This might be due to scanned images
+                  or corrupted PDFs. You can manually add facts during
+                  verification.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -719,6 +794,27 @@ The force must be reasonable from the perspective of a reasonable officer at the
     const currentFact = session.extractedFacts[session.currentFactIndex];
     const progress =
       (session.currentFactIndex / session.extractedFacts.length) * 100;
+
+    // Check if current fact looks like gibberish
+    const isCurrentFactGibberish = isGibberish(currentFact.description);
+
+    // Auto-skip gibberish facts
+    if (
+      isCurrentFactGibberish &&
+      currentFact.source !== "Manual Entry Needed"
+    ) {
+      setTimeout(() => verifyCurrentFact(false), 100);
+      return (
+        <Card className="legal-card">
+          <CardContent className="p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-legal-primary mx-auto mb-4"></div>
+            <p className="text-sm text-muted-foreground">
+              Skipping corrupted text extraction...
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
 
     return (
       <Card className="legal-card">
