@@ -265,32 +265,16 @@ export default function CenterArea({
   };
 
   return (
-    <div className="p-6 h-full">
-      {activeTab === "summary" && (
-        <div className="space-y-6">
-          {renderSummaryView()}
-          {renderChatInterface()}
-        </div>
-      )}
+    <div className="p-6 h-full flex flex-col space-y-6">
+      {/* AI Chat Interface - Always on top */}
+      <div className="flex-1">{renderChatInterface()}</div>
 
+      {/* Case Summary - Always at bottom */}
+      <div className="flex-shrink-0">{renderSummaryView()}</div>
+
+      {/* Special content based on active tab */}
       {activeTab === "violations" && (
-        <div className="space-y-6">
-          {renderViolationsView()}
-          {renderChatInterface()}
-        </div>
-      )}
-
-      {activeTab === "ai" && (
-        <div className="space-y-6">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              AI persona settings are available in the left sidebar when this
-              tab is active.
-            </AlertDescription>
-          </Alert>
-          {renderChatInterface()}
-        </div>
+        <div className="flex-shrink-0">{renderViolationsView()}</div>
       )}
     </div>
   );
