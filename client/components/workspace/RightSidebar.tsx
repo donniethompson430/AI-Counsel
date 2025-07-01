@@ -231,9 +231,17 @@ export default function RightSidebar({
       <div className="space-y-1">
         <p className="text-xs font-medium text-muted-foreground">LEGEND</p>
         {[
-          { type: "person", label: "People", count: case_.persons.length },
-          { type: "evidence", label: "Evidence", count: case_.evidence.length },
-          { type: "fact", label: "Facts", count: case_.timeline.length },
+          {
+            type: "person",
+            label: "People",
+            count: case_.persons?.length || 0,
+          },
+          {
+            type: "evidence",
+            label: "Evidence",
+            count: case_.evidence?.length || 0,
+          },
+          { type: "fact", label: "Facts", count: case_.timeline?.length || 0 },
           { type: "violation", label: "Violations", count: 3 },
         ].map(({ type, label, count }) => {
           const Icon = getNodeIcon(type as Node["type"]);
