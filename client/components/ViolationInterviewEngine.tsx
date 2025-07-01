@@ -595,7 +595,11 @@ export default function ViolationInterviewEngine({
                       ? "border-legal-primary bg-legal-accent"
                       : "hover:bg-muted"
                   }`}
-                  onClick={() => handleViolationSelection(violation.id)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleViolationSelection(violation.id);
+                  }}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
