@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Scale,
-  BarChart3,
   Clock,
   FolderOpen,
   Users,
@@ -11,8 +10,13 @@ import {
   FileText,
   Calendar,
   StickyNote,
-  Heart,
+  Shield,
   Settings,
+  Heart,
+  Bot,
+  Network,
+  BarChart3,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +26,6 @@ import { CaseManager } from "@/lib/case-management";
 import { toast } from "@/hooks/use-toast";
 
 // Import workspace components
-import DashboardTab from "@/components/workspace/DashboardTab";
 import TimelineTab from "@/components/workspace/TimelineTab";
 import EvidenceTab from "@/components/workspace/EvidenceTab";
 import PersonsTab from "@/components/workspace/PersonsTab";
@@ -30,11 +33,14 @@ import SourcesTab from "@/components/workspace/SourcesTab";
 import DocumentsTab from "@/components/workspace/DocumentsTab";
 import DeadlinesTab from "@/components/workspace/DeadlinesTab";
 import NotesTab from "@/components/workspace/NotesTab";
-import ViolationInterviewEngine from "@/components/ViolationInterviewEngine";
+import CenterArea from "@/components/workspace/CenterArea";
+import RightSidebar from "@/components/workspace/RightSidebar";
+import AIPersonaPanel from "@/components/workspace/AIPersonaPanel";
 
 type TabType =
+  | "summary"
+  | "violations"
   | "ai"
-  | "dashboard"
   | "timeline"
   | "evidence"
   | "persons"
@@ -44,23 +50,27 @@ type TabType =
   | "notes";
 
 const TABS = [
-  { id: "ai", name: "🤖 AI Counsel", icon: Scale },
-  { id: "dashboard", name: "📊 Dashboard", icon: BarChart3 },
-  { id: "timeline", name: "⏳ Factual Timeline", icon: Clock },
-  { id: "evidence", name: "🗄 Evidence Locker", icon: FolderOpen },
-  { id: "persons", name: "👥 Persons & Entities", icon: Users },
-  { id: "sources", name: "⚖️ Sources & Statutes", icon: BookOpen },
-  { id: "documents", name: "✍️ Documents & Drafts", icon: FileText },
-  { id: "deadlines", name: "📈 Deadline Manager", icon: Calendar },
-  { id: "notes", name: "📝 Case Notes", icon: StickyNote },
+  { id: "summary", name: "📊 Case Summary", icon: BarChart3 },
+  { id: "violations", name: "⚖️ Violations", icon: Shield },
+  { id: "ai", name: "🤖 AI Settings", icon: Bot },
+  { id: "timeline", name: "⏳ Timeline", icon: Clock },
+  { id: "evidence", name: "🗄 Evidence", icon: FolderOpen },
+  { id: "persons", name: "👥 Persons", icon: Users },
+  { id: "sources", name: "📚 Sources", icon: BookOpen },
+  { id: "documents", name: "✍️ Documents", icon: FileText },
+  { id: "deadlines", name: "📅 Deadlines", icon: Calendar },
+  { id: "notes", name: "📝 Notes", icon: StickyNote },
 ] as const;
+
+type RightPanelView = "nodes" | "timeline" | "stats" | "activity";
 
 export default function CaseWorkspace() {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabType>("ai");
+  const [activeTab, setActiveTab] = useState<TabType>("summary");
   const [case_, setCase] = useState<Case | null>(null);
   const [wellnessMode, setWellnessMode] = useState(false);
+  const [rightPanelView, setRightPanelView] = useState<RightPanelView>("nodes");
   const caseManager = CaseManager.getInstance();
 
   useEffect(() => {
@@ -103,14 +113,34 @@ export default function CaseWorkspace() {
     }
   };
 
-  const renderTabContent = () => {
+  const renderSidebarContent = () => {
     if (!case_) return null;
 
+    // For tabs that need special handling in the sidebar
     switch (activeTab) {
       case "ai":
-        return <ViolationInterviewEngine case={case_} onCaseUpdate={setCase} />;
-      case "dashboard":
-        return <DashboardTab case={case_} onCaseUpdate={setCase} />;
+        return <AIPersonaPanel case={case_} onCaseUpdate={setCase} />;
+      default:
+        return null;
+    }
+  };
+
+  const renderCenterContent = () => {
+    if (!case_) return null;
+
+    // All interactive content goes in the center area
+    switch (activeTab) {
+      case "summary":
+      case "violations":
+      case "ai":
+        return (
+          <CenterArea
+            case={case_}
+            activeTab={activeTab}
+            onCaseUpdate={setCase}
+            onTabChange={setActiveTab}
+          />
+        );
       case "timeline":
         return <TimelineTab case={case_} onCaseUpdate={setCase} />;
       case "evidence":
@@ -126,7 +156,7 @@ export default function CaseWorkspace() {
       case "notes":
         return <NotesTab case={case_} onCaseUpdate={setCase} />;
       default:
-        return <div className="p-6">Tab content not implemented yet.</div>;
+        return <div className="p-6">Content not implemented yet.</div>;
     }
   };
 
@@ -143,8 +173,8 @@ export default function CaseWorkspace() {
 
   return (
     <div className="min-h-screen bg-legal-secondary flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-legal-border shadow-sm legal-sidebar">
+      {/* Left Sidebar - Navigation */}
+      <div className="w-64 bg-white border-r border-legal-border shadow-sm flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-legal-border">
           <div className="flex items-center gap-2 mb-3">
@@ -190,7 +220,7 @@ export default function CaseWorkspace() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="p-2">
+        <div className="flex-1 p-2">
           <p className="text-xs font-medium text-muted-foreground px-3 py-2">
             TOOLBOX
           </p>
@@ -218,8 +248,11 @@ export default function CaseWorkspace() {
           </nav>
         </div>
 
+        {/* Sidebar Content (for AI persona settings, etc.) */}
+        {renderSidebarContent()}
+
         {/* Quick Stats */}
-        <div className="p-4 mt-auto border-t border-legal-border">
+        <div className="p-4 border-t border-legal-border">
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="text-center">
               <div className="font-semibold text-legal-primary">
@@ -249,7 +282,7 @@ export default function CaseWorkspace() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Center Area - Main Content + AI */}
       <div className="flex-1 flex flex-col">
         {/* Top Bar */}
         <header className="bg-white border-b border-legal-border px-6 py-4">
@@ -278,7 +311,7 @@ export default function CaseWorkspace() {
           </div>
         </header>
 
-        {/* Tab Content */}
+        {/* Main Content Area */}
         <main className="flex-1 overflow-auto">
           {wellnessMode ? (
             <div className="p-6">
@@ -297,41 +330,30 @@ export default function CaseWorkspace() {
                     </p>
                     <p className="text-muted-foreground mb-6">
                       Feeling overwhelmed is normal in a case like this.
-                      Sometimes the best thing to do is organize your notes or
-                      review the timeline to find inspiration.
                     </p>
-                    <div className="space-y-2">
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => setActiveTab("timeline")}
-                      >
-                        Review Timeline
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => setActiveTab("notes")}
-                      >
-                        Organize Notes
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => setWellnessMode(false)}
-                      >
-                        Back to Full Interface
-                      </Button>
-                    </div>
+                    <Button
+                      onClick={() => setWellnessMode(false)}
+                      className="mx-auto"
+                    >
+                      Continue Working
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
           ) : (
-            renderTabContent()
+            renderCenterContent()
           )}
         </main>
       </div>
+
+      {/* Right Sidebar - Visualization */}
+      <RightSidebar
+        case={case_}
+        activeView={rightPanelView}
+        onViewChange={setRightPanelView}
+        onCaseUpdate={setCase}
+      />
     </div>
   );
 }
