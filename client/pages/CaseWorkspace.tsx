@@ -36,6 +36,7 @@ import NotesTab from "@/components/workspace/NotesTab";
 import CenterArea from "@/components/workspace/CenterArea";
 import RightSidebar from "@/components/workspace/RightSidebar";
 import AIPersonaPanel from "@/components/workspace/AIPersonaPanel";
+import QuickActions from "@/components/workspace/QuickActions";
 
 type TabType =
   | "summary"
