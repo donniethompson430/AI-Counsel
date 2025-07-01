@@ -84,6 +84,12 @@ export default function DashboardTab({
             });
           }
 
+          // Update case state to trigger AI response
+          const updatedCase = caseManager.getCase(case_.id);
+          if (updatedCase) {
+            onCaseUpdate(updatedCase);
+          }
+
           toast({
             title: "File Processed Successfully",
             description: `${file.name} - AI analysis complete! Check AI Counsel tab for live feedback.`,

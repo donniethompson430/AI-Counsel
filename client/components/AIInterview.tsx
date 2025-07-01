@@ -60,6 +60,16 @@ export default function AIInterview({
     case_.timeline.length,
   );
 
+  // Debug logging
+  useEffect(() => {
+    console.log(
+      "AI Interview: Case evidence count:",
+      case_.evidence.length,
+      "Timeline count:",
+      case_.timeline.length,
+    );
+  }, [case_.evidence.length, case_.timeline.length]);
+
   useEffect(() => {
     // Initialize with welcome message
     const welcomeMessage: Message = {
@@ -99,22 +109,27 @@ What would you like to work on first?`,
     // Check for new evidence files
     if (currentEvidenceCount > lastEvidenceCount) {
       const newFiles = case_.evidence.slice(lastEvidenceCount);
-      newFiles.forEach((file) => {
-        const aiResponse = caseManager.generateAIResponse(
-          `I see you just uploaded "${file.fileName}"! ${file.extractedText ? "I extracted the text content and" : "I captured the metadata and"} ${file.tags.length > 0 ? `found ${file.tags.length} relevant legal keywords: ${file.tags.join(", ")}.` : "analyzed the file structure."} This strengthens your evidence collection.`,
-          "file-upload",
-        );
 
-        const aiMessage: Message = {
-          id: `msg-${Date.now()}-${file.id}`,
-          type: "ai",
-          content: aiResponse,
-          timestamp: new Date(),
-          persona: selectedPersona,
-        };
+      // Add a small delay to ensure UI has updated
+      setTimeout(() => {
+        newFiles.forEach((file) => {
+          const aiResponse = caseManager.generateAIResponse(
+            `I see you just uploaded "${file.fileName}"! ${file.extractedText ? "I extracted the text content and" : "I captured the metadata and"} ${file.tags.length > 0 ? `found ${file.tags.length} relevant legal keywords: ${file.tags.join(", ")}.` : "analyzed the file structure."} This strengthens your evidence collection.`,
+            "file-upload",
+          );
 
-        setMessages((prev) => [...prev, aiMessage]);
-      });
+          const aiMessage: Message = {
+            id: `msg-${Date.now()}-${file.id}`,
+            type: "ai",
+            content: aiResponse,
+            timestamp: new Date(),
+            persona: selectedPersona,
+          };
+
+          setMessages((prev) => [...prev, aiMessage]);
+        });
+      }, 500);
+
       setLastEvidenceCount(currentEvidenceCount);
     }
 
@@ -126,26 +141,27 @@ What would you like to work on first?`,
       );
 
       if (autoExtracted.length > 0) {
-        const aiResponse = caseManager.generateAIResponse(
-          `Great! I automatically extracted ${autoExtracted.length} timeline ${autoExtracted.length === 1 ? "fact" : "facts"} from your uploaded documents. Your case timeline is becoming more complete and organized.`,
-          "timeline",
-        );
+        setTimeout(() => {
+          const aiResponse = caseManager.generateAIResponse(
+            `Great! I automatically extracted ${autoExtracted.length} timeline ${autoExtracted.length === 1 ? "fact" : "facts"} from your uploaded documents. Your case timeline is becoming more complete and organized.`,
+            "timeline",
+          );
 
-        const aiMessage: Message = {
-          id: `msg-${Date.now()}-timeline`,
-          type: "ai",
-          content: aiResponse,
-          timestamp: new Date(),
-          persona: selectedPersona,
-        };
+          const aiMessage: Message = {
+            id: `msg-${Date.now()}-timeline`,
+            type: "ai",
+            content: aiResponse,
+            timestamp: new Date(),
+            persona: selectedPersona,
+          };
 
-        setMessages((prev) => [...prev, aiMessage]);
+          setMessages((prev) => [...prev, aiMessage]);
+        }, 800);
       }
       setLastTimelineCount(currentTimelineCount);
     }
   }, [
-    case_.evidence.length,
-    case_.timeline.length,
+    case_,
     lastEvidenceCount,
     lastTimelineCount,
     selectedPersona,
