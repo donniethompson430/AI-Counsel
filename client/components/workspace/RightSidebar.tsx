@@ -304,7 +304,8 @@ export default function RightSidebar({
           <span className="font-medium">
             {Math.min(
               100,
-              case_.timeline.length * 10 + case_.evidence.length * 5,
+              (case_.timeline?.length || 0) * 10 +
+                (case_.evidence?.length || 0) * 5,
             )}
             %
           </span>
@@ -313,7 +314,7 @@ export default function RightSidebar({
           <div
             className="bg-legal-primary h-2 rounded-full transition-all"
             style={{
-              width: `${Math.min(100, case_.timeline.length * 10 + case_.evidence.length * 5)}%`,
+              width: `${Math.min(100, (case_.timeline?.length || 0) * 10 + (case_.evidence?.length || 0) * 5)}%`,
             }}
           />
         </div>
@@ -324,15 +325,15 @@ export default function RightSidebar({
         {[
           {
             label: "Timeline Built",
-            progress: Math.min(100, case_.timeline.length * 20),
+            progress: Math.min(100, (case_.timeline?.length || 0) * 20),
           },
           {
             label: "Evidence Collected",
-            progress: Math.min(100, case_.evidence.length * 25),
+            progress: Math.min(100, (case_.evidence?.length || 0) * 25),
           },
           {
             label: "People Identified",
-            progress: Math.min(100, case_.persons.length * 33),
+            progress: Math.min(100, (case_.persons?.length || 0) * 33),
           },
         ].map(({ label, progress }) => (
           <div key={label} className="space-y-1">
