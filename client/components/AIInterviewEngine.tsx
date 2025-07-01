@@ -842,35 +842,69 @@ The force must be reasonable from the perspective of a reasonable officer at the
         <CardContent className="space-y-6">
           <Progress value={progress} className="w-full" />
 
-          {/* Original Statement */}
-          <div
-            className={`p-4 rounded-lg ${
-              currentFact.source === "Manual Entry Needed"
-                ? "bg-blue-50 border border-blue-200"
-                : "bg-muted"
-            }`}
-          >
-            <h4 className="font-semibold mb-2">
-              {currentFact.source === "Manual Entry Needed"
-                ? "📝 Manual Entry Required:"
-                : "📝 What I Found in Your Files:"}
-            </h4>
-            <p className="text-sm italic">"{currentFact.description}"</p>
-            <p className="text-xs text-muted-foreground mt-2">
-              Source: {currentFact.source} | Confidence:{" "}
-              {currentFact.confidence}
-            </p>
-            {currentFact.source === "Manual Entry Needed" && (
-              <div className="mt-2 p-2 bg-blue-100 rounded text-xs text-blue-800">
-                💡 <strong>Tip:</strong> Use the text area below to describe
-                what happened in your own words. I'll help you convert it to
-                proper legal language.
+          {/* Check if current fact is corrupted and handle it */}
+          {isGibberish(currentFact.description) &&
+          currentFact.source !== "Manual Entry Needed" ? (
+            <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+              <h4 className="font-semibold mb-2 text-red-800">
+                ⚠️ Corrupted Text Extraction Detected
+              </h4>
+              <p className="text-sm text-red-700 mb-3">
+                This fact contains corrupted or unreadable text from your PDF
+                file. This often happens with scanned documents or corrupted
+                files.
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => verifyCurrentFact(false)}
+                  variant="outline"
+                  size="sm"
+                >
+                  Skip This Fact
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSession(null);
+                    setTimeout(() => initiateAnalysisSession(), 500);
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Restart Analysis
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div
+              className={`p-4 rounded-lg ${
+                currentFact.source === "Manual Entry Needed"
+                  ? "bg-blue-50 border border-blue-200"
+                  : "bg-muted"
+              }`}
+            >
+              <h4 className="font-semibold mb-2">
+                {currentFact.source === "Manual Entry Needed"
+                  ? "📝 Manual Entry Required:"
+                  : "📝 What I Found in Your Files:"}
+              </h4>
+              <p className="text-sm italic">"{currentFact.description}"</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Source: {currentFact.source} | Confidence:{" "}
+                {currentFact.confidence}
+              </p>
+              {currentFact.source === "Manual Entry Needed" && (
+                <div className="mt-2 p-2 bg-blue-100 rounded text-xs text-blue-800">
+                  💡 <strong>Tip:</strong> Use the text area below to describe
+                  what happened in your own words. I'll help you convert it to
+                  proper legal language.
+                </div>
+              )}
+            </div>
+          )}
 
-          {/* Legal Concept Translation */}
-          {currentFact.legalConcepts &&
+          {/* Legal Concept Translation - Only show for valid facts */}
+          {!isGibberish(currentFact.description) &&
+            currentFact.legalConcepts &&
             currentFact.legalConcepts.length > 0 && (
               <div className="border border-legal-border p-4 rounded-lg">
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
@@ -944,8 +978,9 @@ The force must be reasonable from the perspective of a reasonable officer at the
             </div>
           )}
 
-          {/* Guided Questions for Legal Elements */}
-          {currentFact.legalConcepts &&
+          {/* Guided Questions for Legal Elements - Only show for valid facts */}
+          {!isGibberish(currentFact.description) &&
+            currentFact.legalConcepts &&
             currentFact.legalConcepts.includes("Excessive Force") && (
               <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
                 <h4 className="font-semibold mb-3">
@@ -996,40 +1031,50 @@ The force must be reasonable from the perspective of a reasonable officer at the
               </div>
             )}
 
-          {/* Fact Editor */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">
-              Proposed Legal Fact (edit as needed):
-            </label>
-            <Textarea
-              value={
-                userInput ||
-                (currentFact.originalLanguage
-                  ? translateEmotionalLanguage(currentFact.description)
-                  : currentFact.description)
-              }
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder="Edit the fact description..."
-              className="min-h-[100px]"
-            />
-            <p className="text-xs text-muted-foreground">
-              This will be added to your official timeline as a verified fact.
-            </p>
-          </div>
+          {/* Fact Editor - Only show for valid facts */}
+          {!isGibberish(currentFact.description) && (
+            <>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Proposed Legal Fact (edit as needed):
+                </label>
+                <Textarea
+                  value={
+                    userInput ||
+                    (currentFact.originalLanguage
+                      ? translateEmotionalLanguage(currentFact.description)
+                      : currentFact.description)
+                  }
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder="Edit the fact description..."
+                  className="min-h-[100px]"
+                />
+                <p className="text-xs text-muted-foreground">
+                  This will be added to your official timeline as a verified
+                  fact.
+                </p>
+              </div>
 
-          {/* Verification Buttons */}
-          <div className="flex gap-2">
-            <Button
-              onClick={() => verifyCurrentFact(true, userInput || undefined)}
-              className="flex-1"
-            >
-              <Check className="h-4 w-4 mr-2" />✓ Approve & Add to Timeline
-            </Button>
-            <Button variant="outline" onClick={() => verifyCurrentFact(false)}>
-              <X className="h-4 w-4 mr-2" />
-              Skip This Fact
-            </Button>
-          </div>
+              {/* Verification Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() =>
+                    verifyCurrentFact(true, userInput || undefined)
+                  }
+                  className="flex-1"
+                >
+                  <Check className="h-4 w-4 mr-2" />✓ Approve & Add to Timeline
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => verifyCurrentFact(false)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Skip This Fact
+                </Button>
+              </div>
+            </>
+          )}
 
           <p className="text-xs text-muted-foreground text-center">
             💡 You can always edit facts later in your Timeline tab
