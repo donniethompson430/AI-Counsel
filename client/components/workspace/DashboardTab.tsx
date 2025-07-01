@@ -19,6 +19,7 @@ import { CaseManager } from "@/lib/case-management";
 import { FileProcessor } from "@/lib/file-processor";
 import { toast } from "@/hooks/use-toast";
 import VerificationCenter from "@/components/VerificationCenter";
+import { notifications } from "@/lib/notifications";
 
 interface DashboardTabProps {
   case: Case;
@@ -85,11 +86,14 @@ export default function DashboardTab({
             });
           }
 
-          // Update case state to trigger AI response
+          // Update case state and notify AI system
           const updatedCase = caseManager.getCase(case_.id);
           if (updatedCase) {
             onCaseUpdate(updatedCase);
           }
+
+          // Notify that a file was uploaded
+          notifications.notifyFileUploaded(case_.id, file.name);
 
           toast({
             title: "File Processed Successfully",

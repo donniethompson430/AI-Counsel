@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { Case, AIPersona, TimelineFact, Person } from "@shared/types";
 import { CaseManager } from "@/lib/case-management";
+import { notifications } from "@/lib/notifications";
 
 interface AIInterviewEngineProps {
   case: Case;
@@ -96,18 +97,40 @@ export default function AIInterviewEngine({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const caseManager = CaseManager.getInstance();
 
-  // Monitor for new file uploads to trigger analysis
+  // Listen for verification requests and file uploads
   useEffect(() => {
-    if (case_.evidence.length > 0 && !session) {
-      console.log("Files detected, ready to start AI analysis...");
-      // Auto-start analysis if files exist but no session is active
-      setTimeout(() => {
-        if (!session) {
-          initiateAnalysisSession();
+    const unsubscribeVerification = notifications.subscribe(
+      "verification-requested",
+      (data) => {
+        if (data.caseId === case_.id && !session && case_.evidence.length > 0) {
+          console.log("Verification requested for case:", case_.id);
+          setTimeout(() => {
+            if (!session) {
+              initiateAnalysisSession();
+            }
+          }, 500);
         }
-      }, 1000);
-    }
-  }, [case_.evidence.length, session]);
+      },
+    );
+
+    const unsubscribeFileUpload = notifications.subscribe(
+      "file-uploaded",
+      (data) => {
+        if (data.caseId === case_.id && !session) {
+          console.log(
+            "File uploaded, ready for verification:",
+            data.payload?.fileName,
+          );
+          // Could auto-start here or wait for explicit verification request
+        }
+      },
+    );
+
+    return () => {
+      unsubscribeVerification();
+      unsubscribeFileUpload();
+    };
+  }, [case_.id, session, case_.evidence.length]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -746,7 +769,7 @@ The force must be reasonable from the perspective of a reasonable officer at the
         </div>
 
         <Button onClick={() => setSession(null)} className="w-full">
-          �� Continue Building My Case
+          🎯 Continue Building My Case
         </Button>
       </CardContent>
     </Card>
