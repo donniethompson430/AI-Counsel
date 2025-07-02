@@ -440,6 +440,7 @@ Please consult with a qualified attorney for legal advice.
             Press Enter to send • Shift+Enter for new line
           </p>
         </div>
+        <DevLink />
       </div>
     </div>
   );
