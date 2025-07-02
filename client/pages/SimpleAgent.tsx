@@ -391,7 +391,7 @@ Please consult with a qualified attorney for legal advice.
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b px-6 py-4 flex items-center justify-between">
+      <header className="bg-white border-b px-6 py-4 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <Scale className="h-6 w-6 text-legal-primary" />
           <h1 className="text-lg font-semibold text-legal-primary">
@@ -407,8 +407,8 @@ Please consult with a qualified attorney for legal advice.
       </header>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
-        <div className="flex-1 overflow-auto p-4 space-y-4">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full min-h-0">
+        <div className="flex-1 overflow-auto p-4 space-y-4 min-h-0">
           {messages.map((message) => (
             <div
               key={message.id}
