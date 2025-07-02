@@ -320,11 +320,33 @@ Please consult with a qualified attorney for legal advice.
                 <h2 className="text-2xl font-semibold mb-4">
                   Let's Build Your Legal Case Together
                 </h2>
-                <p className="text-gray-600 mb-8">
+                <p className="text-gray-600 mb-6">
                   I'll interview you about your situation, identify potential
                   legal violations, and help you organize the facts into a
                   strong case. This usually takes 10-15 minutes.
                 </p>
+
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <div className="text-red-800 text-sm">
+                    <p className="font-semibold mb-2">
+                      ⚠️ Educational Disclaimer
+                    </p>
+                    <p className="mb-2">
+                      This AI assistant is provided for{" "}
+                      <strong>educational purposes only</strong> and does not
+                      constitute legal advice. You are solely responsible for
+                      any content, information, or actions taken based on this
+                      tool's output.
+                    </p>
+                    <p className="text-xs">
+                      By proceeding, you understand and agree that this is not a
+                      substitute for professional legal counsel. Always consult
+                      with a qualified attorney for legal advice specific to
+                      your situation.
+                    </p>
+                  </div>
+                </div>
+
                 <div className="space-y-4">
                   <Button
                     onClick={startConversation}
