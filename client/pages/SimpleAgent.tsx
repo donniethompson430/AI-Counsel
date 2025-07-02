@@ -166,6 +166,12 @@ export default function SimpleAgent() {
   const generateResponse = (userMessage: string) => {
     const lowerMessage = userMessage.toLowerCase();
 
+    // Include context from uploaded files
+    const fileContext =
+      uploadedFiles.length > 0
+        ? `\n\n📋 *I also have ${uploadedFiles.length} uploaded file(s) to reference.*`
+        : "";
+
     // Simple keyword-based responses (in real app, this would be actual AI)
     if (
       lowerMessage.includes("police") ||
