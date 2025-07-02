@@ -109,11 +109,27 @@ export default function SimpleAgentFixed() {
 
   const startConversation = () => {
     setIsStarted(true);
-    addMessage(
-      "agent",
-      "Hello! I'm your AI Legal Assistant. I'm here to help you build a strong legal case by identifying potential violations and gathering the facts you need.\n\nYou can either tell me what happened or upload relevant files (documents, photos, videos, audio recordings). I can process PDFs, Word docs, images, videos, and more to help build your case.\n\nHow would you like to start?",
-      "intro",
-    );
+    const introMessage = getPersonalityIntro();
+    addMessage("agent", introMessage, "intro");
+  };
+
+  const getPersonalityIntro = () => {
+    const baseMessage =
+      "I can process PDFs, Word docs, images, videos, and more to help build your case.\n\nHow would you like to start?";
+
+    switch (selectedPersonality) {
+      case "supportive":
+        return `Hello! I'm your AI Legal Assistant, and I want you to know that I'm here to support you through this challenging time. 💙\n\nI understand that dealing with legal issues can be overwhelming, but you don't have to face this alone. I'll help you build a strong case by carefully identifying potential violations and gathering the facts you need - all at your own pace.\n\n${baseMessage}`;
+
+      case "balanced":
+        return `Hello! I'm your AI Legal Assistant. I'm here to help you build a strong legal case by systematically identifying potential violations and organizing the facts you need.\n\nI'll provide professional analysis and guide you through the legal process efficiently.\n\n${baseMessage}`;
+
+      case "aggressive":
+        return `Well hello there! 😈 I'm your AI Legal Assistant, and I've got some news for you - if someone violated your rights, they picked the WRONG person to mess with.\n\nI'm here to help you build an absolutely devastating case that'll make them regret the day they decided to screw with you. Time to turn the tables and make them pay.\n\n${baseMessage}`;
+
+      default:
+        return `Hello! I'm your AI Legal Assistant. I'm here to help you build a strong legal case by identifying potential violations and gathering the facts you need.\n\n${baseMessage}`;
+    }
   };
 
   const handleSendMessage = () => {
