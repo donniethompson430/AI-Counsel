@@ -286,17 +286,17 @@ Please consult with a qualified attorney for legal advice.
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100">
         {/* Hero Section */}
         <div className="container mx-auto px-6 py-8">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <Scale className="h-12 w-12 text-legal-primary" />
-              <h1 className="text-4xl font-bold text-legal-primary">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Scale className="h-10 w-10 text-legal-primary" />
+              <h1 className="text-3xl font-bold text-legal-primary">
                 AI Counsel
               </h1>
             </div>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
               Your AI Legal Assistant for Civil Rights Cases
             </p>
-            <div className="flex items-center justify-center gap-6 text-sm text-gray-500 mb-12">
+            <div className="flex items-center justify-center gap-6 text-sm text-gray-500 mb-8">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
                 <span>Identify Violations</span>
