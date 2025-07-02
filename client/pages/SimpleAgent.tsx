@@ -574,13 +574,62 @@ Please consult with a qualified attorney for legal advice.
           </div>
         )}
 
+        {/* Uploaded Files Display */}
+        {uploadedFiles.length > 0 && (
+          <div className="border-t bg-gray-50 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Paperclip className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Uploaded Files ({uploadedFiles.length})
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {uploadedFiles.map((file, index) => {
+                const FileIcon = getFileIcon(file.fileType);
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <FileIcon className="h-4 w-4 text-gray-500" />
+                    <span className="truncate max-w-[120px]">
+                      {file.fileName}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(index)}
+                      className="h-4 w-4 p-0 hover:bg-red-100"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Input Area */}
         <div className="border-t bg-white p-4">
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isProcessingFiles}
+              className="self-end"
+            >
+              {isProcessingFiles ? (
+                <div className="w-4 h-4 border-2 border-legal-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
+            </Button>
             <Textarea
               value={currentInput}
               onChange={(e) => setCurrentInput(e.target.value)}
-              placeholder="Tell me what happened..."
+              placeholder="Tell me what happened, or upload files for analysis..."
               className="flex-1 resize-none"
               rows={2}
               onKeyDown={(e) => {
@@ -598,9 +647,23 @@ Please consult with a qualified attorney for legal advice.
               <Send className="h-4 w-4" />
             </Button>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Press Enter to send • Shift+Enter for new line
-          </p>
+          <div className="flex justify-between items-center mt-2">
+            <p className="text-xs text-gray-500">
+              Press Enter to send • Shift+Enter for new line
+            </p>
+            <p className="text-xs text-gray-500">
+              Supports: PDF, DOC, images, videos, audio
+            </p>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.mp3,.wav,.mpeg"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
         </div>
         <DevLink />
       </div>
