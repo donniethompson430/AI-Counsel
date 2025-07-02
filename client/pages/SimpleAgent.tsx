@@ -79,9 +79,7 @@ export default function SimpleAgent() {
     );
   };
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
 
@@ -104,29 +102,27 @@ export default function SimpleAgent() {
       }
     }
 
-    setUploadedFiles((prev) => [...prev, ...processedFiles]);
+    setUploadedFiles(prev => [...prev, ...processedFiles]);
     setIsProcessingFiles(false);
 
     // Add message about uploaded files
-    const fileList = processedFiles.map((f) => f.fileName).join(", ");
+    const fileList = processedFiles.map(f => f.fileName).join(", ");
     addMessage("user", `📎 Uploaded files: ${fileList}`);
 
     // AI response about processing files
     setTimeout(() => {
-      const hasContent = processedFiles.some(
-        (f) => f.content || f.metadata.extractedText,
-      );
+      const hasContent = processedFiles.some(f => f.content || f.metadata.extractedText);
       if (hasContent) {
         addMessage(
           "agent",
           "Great! I've processed your files and extracted relevant information. I can see some important details that will help with your case. Can you tell me more about what happened in your situation?",
-          "analysis",
+          "analysis"
         );
       } else {
         addMessage(
           "agent",
           "I've received your files and they're ready for analysis. Now, can you tell me what happened in your situation? I'll use the uploaded evidence to strengthen your case.",
-          "question",
+          "question"
         );
       }
     }, 1000);
@@ -138,13 +134,13 @@ export default function SimpleAgent() {
   };
 
   const removeFile = (index: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith("image/")) return Image;
-    if (fileType.startsWith("video/")) return Video;
-    if (fileType.startsWith("audio/")) return Music;
+    if (fileType.startsWith('image/')) return Image;
+    if (fileType.startsWith('video/')) return Video;
+    if (fileType.startsWith('audio/')) return Music;
     return File;
   };
 
@@ -167,10 +163,9 @@ export default function SimpleAgent() {
     const lowerMessage = userMessage.toLowerCase();
 
     // Include context from uploaded files
-    const fileContext =
-      uploadedFiles.length > 0
-        ? `\n\n📋 *I also have ${uploadedFiles.length} uploaded file(s) to reference.*`
-        : "";
+    const fileContext = uploadedFiles.length > 0
+      ? `\n\n📋 *I also have ${uploadedFiles.length} uploaded file(s) to reference.*`
+      : "";
 
     // Simple keyword-based responses (in real app, this would be actual AI)
     if (
@@ -328,14 +323,10 @@ Please consult with a qualified attorney for legal advice.
 
                 <div className="mb-6">
                   <p className="text-gray-600 text-sm mb-2">
-                    <span className="font-bold text-red-600">Disclaimer:</span>{" "}
-                    This AI assistant is provided for educational purposes only
-                    and does not constitute legal advice. You are solely
-                    responsible for any content, information, or actions taken
-                    based on this tool's output. By proceeding, you understand
-                    and agree that this is not a substitute for professional
-                    legal counsel. Always consult with a qualified attorney for
-                    legal advice specific to your situation.
+                    <span className="font-bold text-red-600">Disclaimer:</span> This AI assistant is provided for educational purposes only and does not constitute legal advice.
+                    You are solely responsible for any content, information, or actions taken based on this tool's output.
+                    By proceeding, you understand and agree that this is not a substitute for professional legal counsel.
+                    Always consult with a qualified attorney for legal advice specific to your situation.
                   </p>
                 </div>
 
@@ -344,8 +335,8 @@ Please consult with a qualified attorney for legal advice.
                   size="lg"
                   className="bg-legal-primary hover:bg-legal-primary/90 px-8 py-3"
                 >
-                  <Bot className="h-5 w-5 mr-2" />I Understand & Agree - Start
-                  Interview
+                  <Bot className="h-5 w-5 mr-2" />
+                  I Understand & Agree - Start Interview
                 </Button>
 
                 <p className="text-xs text-gray-500 mt-4">
@@ -389,29 +380,29 @@ Please consult with a qualified attorney for legal advice.
   }
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="bg-white border-b px-6 py-4 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <Scale className="h-6 w-6 text-legal-primary" />
-          <h1 className="text-lg font-semibold text-legal-primary">
-            AI Counsel
-          </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100">
+      <div className="container mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Scale className="h-8 w-8 text-legal-primary" />
+            <h1 className="text-2xl font-bold text-legal-primary">AI Counsel</h1>
+            {caseData && (
+              <Button onClick={downloadCaseSummary} variant="outline" size="sm" className="ml-4">
+                <Download className="h-4 w-4 mr-2" />
+                Download Case Summary
+              </Button>
+            )}
+          </div>
+          <p className="text-gray-600">Legal Case Building Assistant</p>
         </div>
-        {caseData && (
-          <Button onClick={downloadCaseSummary} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Download Case Summary
-          </Button>
-        )}
-      </header>
 
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full overflow-hidden">
-        <div
-          className="overflow-auto p-4 space-y-4"
-          style={{ height: "calc(100vh - 200px)" }}
-        >
+        {/* Chat Container */}
+        <div className="max-w-4xl mx-auto">
+          <Card className="shadow-lg border-0 bg-white/90 backdrop-blur">
+            <CardContent className="p-0">
+              {/* Messages Area */}
+              <div className="h-[500px] overflow-auto p-6 space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -534,9 +525,7 @@ Please consult with a qualified attorney for legal advice.
                     className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 text-sm"
                   >
                     <FileIcon className="h-4 w-4 text-gray-500" />
-                    <span className="truncate max-w-[120px]">
-                      {file.fileName}
-                    </span>
+                    <span className="truncate max-w-[120px]">{file.fileName}</span>
                     <Button
                       variant="ghost"
                       size="sm"
