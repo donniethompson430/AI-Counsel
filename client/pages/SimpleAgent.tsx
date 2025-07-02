@@ -13,8 +13,16 @@ import {
   Shield,
   FileText,
   CheckCircle,
+  Upload,
+  File,
+  Image,
+  Video,
+  Music,
+  X,
+  Paperclip,
 } from "lucide-react";
 import DevLink from "@/components/DevLink";
+import { FileProcessor, ProcessedFile } from "@/lib/file-processor";
 
 interface Message {
   id: string;
