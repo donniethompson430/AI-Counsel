@@ -282,6 +282,7 @@ Please consult with a qualified attorney for legal advice.
             </Card>
           </div>
         </div>
+        <DevLink />
       </div>
     );
   }
