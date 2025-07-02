@@ -20,7 +20,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<SimpleAgent />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/case/:caseId" element={<CaseWorkspace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
