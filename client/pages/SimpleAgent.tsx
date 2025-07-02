@@ -169,7 +169,7 @@ export default function SimpleAgent() {
     // Include context from uploaded files
     const fileContext =
       uploadedFiles.length > 0
-        ? `\n\n📋 *I also have ${uploadedFiles.length} uploaded file(s) to reference.*`
+        ? `\n\n��� *I also have ${uploadedFiles.length} uploaded file(s) to reference.*`
         : "";
 
     // Simple keyword-based responses (in real app, this would be actual AI)
@@ -407,8 +407,8 @@ Please consult with a qualified attorney for legal advice.
       </header>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full min-h-0">
-        <div className="flex-1 overflow-auto p-4 space-y-4 min-h-0">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full min-h-0 max-h-[calc(100vh-80px)]">
+        <div className="flex-1 overflow-auto p-4 space-y-4 min-h-0 max-h-[calc(100vh-200px)]">
           {messages.map((message) => (
             <div
               key={message.id}
