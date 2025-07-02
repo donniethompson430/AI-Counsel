@@ -96,11 +96,14 @@ export default function SimpleAgentFixed() {
 
   const generateResponse = (userMessage: string) => {
     const lowerMessage = userMessage.toLowerCase();
-    const fileContext =
-      uploadedFiles.length > 0
-        ? `\n\n📋 *I also have ${uploadedFiles.length} uploaded file(s) to reference.*`
-        : "";
 
+    // Check if this is a response to file upload
+    if (lowerMessage.includes("uploaded files:")) {
+      performComprehensiveAnalysis();
+      return;
+    }
+
+    // Regular conversation flow
     if (
       lowerMessage.includes("police") ||
       lowerMessage.includes("officer") ||
@@ -108,10 +111,10 @@ export default function SimpleAgentFixed() {
     ) {
       addMessage(
         "agent",
-        `I understand you had an encounter with law enforcement. This could potentially involve several legal issues. Let me ask you some specific questions:\n\n1. **Excessive Force**: Did the officer use any physical force against you?\n2. **Unlawful Search**: Did they search you, your vehicle, or belongings?\n3. **False Arrest**: Were you detained or arrested?\n\nWhich of these situations occurred, if any?${fileContext}`,
+        `I understand you had an encounter with law enforcement. This could potentially involve several legal issues. Let me ask you some specific questions:\n\n1. **Excessive Force**: Did the officer use any physical force against you?\n2. **Unlawful Search**: Did they search you, your vehicle, or belongings?\n3. **False Arrest**: Were you detained or arrested?\n\nWhich of these situations occurred, if any?`,
         "question",
       );
-    } else if (messages.length > 6) {
+    } else if (messages.length > 8) {
       // Generate case summary after several exchanges
       const mockCase: CaseData = {
         title: "Civil Rights Violation Case",
@@ -149,6 +152,33 @@ export default function SimpleAgentFixed() {
         "question",
       );
     }
+  };
+
+  const performComprehensiveAnalysis = () => {
+    // Simulate analyzing uploaded documents
+    setTimeout(() => {
+      addMessage(
+        "agent",
+        "🔍 **ANALYZING UPLOADED DOCUMENTS...**\n\n*Processing file content, extracting entities, identifying violations...*",
+        "analysis",
+      );
+    }, 500);
+
+    setTimeout(() => {
+      addMessage(
+        "agent",
+        "**Well, well, well... what do we have here?** 😏\n\nSeems like Officer Gonzales is not having a very good day. And it's only going to get worse.\n\n**HERE'S WHAT I SEE:**\n\n🎯 **IDENTIFIED VIOLATIONS:**\n• **Unlawful Search & Seizure** (4th Amendment)\n• **Excessive Force** (Graham v. Connor)\n• **False Arrest** (Lack of Probable Cause)\n\n👥 **EXTRACTED PERSONS:**\n• **Officer Gonzales** (DEFENDANT) - Primary violator\n• **Officer Martinez** (DEFENDANT) - Secondary participant  \n• **John Smith** (WITNESS) - Bystander who recorded incident\n• **Jane Doe** (VICTIM) - You, the complainant\n\n📊 **CASE STRENGTH:** High potential for §1983 civil rights claim\n\n⚖️ **TEXAS LEGAL FRAMEWORK:**\nUnder Texas Code of Criminal Procedure Art. 14.01 and the 4th Amendment, any search must be based on probable cause or valid consent. Your document indicates NEITHER existed.",
+        "analysis",
+      );
+    }, 3000);
+
+    setTimeout(() => {
+      addMessage(
+        "agent",
+        "**Let's discuss Officer Gonzales and his questionable actions... 🕵️‍♂️**\n\n**LEGAL EDUCATION - 4th Amendment (Texas Application):**\n\nAccording to **Texas Penal Code §38.02** and **U.S.C. §1983**, unreasonable search and seizure occurs when:\n\n1. **No Valid Warrant** was presented\n2. **No Probable Cause** existed for the search  \n3. **No Consent** was given by the subject\n4. **No Exigent Circumstances** justified immediate action\n\n**According to your statement**, you allegedly stated that:\n• Officer Gonzales searched your vehicle without consent\n• No warrant was presented\n• No contraband was in plain view\n• You were compliant and non-threatening\n\n**SO LET'S DISCUSS OFFICER GONZALES:**\n\n❓ **When Officer Gonzales initiated the search of your vehicle, did he:**\n   A) Show you a valid search warrant?\n   B) Ask for your explicit consent?\n   C) Explain the legal basis for the search?\n   D) None of the above?\n\n❓ **What EXACTLY did Officer Gonzales say to justify the search?**\n\n❓ **Were there any items in plain view that could have provided probable cause?**",
+        "question",
+      );
+    }, 6000);
   };
 
   const handleFileUpload = async (
