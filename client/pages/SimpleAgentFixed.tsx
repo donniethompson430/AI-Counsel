@@ -212,12 +212,9 @@ export default function SimpleAgentFixed() {
     const fileList = processedFiles.map((f) => f.fileName).join(", ");
     addMessage("user", `📎 Uploaded files: ${fileList}`);
 
+    // Trigger comprehensive analysis instead of generic response
     setTimeout(() => {
-      addMessage(
-        "agent",
-        "Great! I've processed your files and extracted relevant information. Now, can you tell me what happened in your situation? I'll use the uploaded evidence to strengthen your case.",
-        "analysis",
-      );
+      performComprehensiveAnalysis();
     }, 1000);
 
     if (event.target) {
