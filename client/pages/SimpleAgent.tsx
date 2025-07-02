@@ -14,6 +14,7 @@ import {
   FileText,
   CheckCircle,
 } from "lucide-react";
+import DevLink from "@/components/DevLink";
 
 interface Message {
   id: string;
