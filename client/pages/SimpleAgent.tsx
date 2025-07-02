@@ -315,7 +315,7 @@ Please consult with a qualified attorney for legal advice.
           {/* Main Call to Action */}
           <div className="max-w-2xl mx-auto">
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-              <CardContent className="p-8 text-center">
+              <CardContent className="p-6 text-center">
                 <Sparkles className="h-16 w-16 text-legal-primary mx-auto mb-6" />
                 <h2 className="text-2xl font-semibold mb-4">
                   Let's Build Your Legal Case Together
