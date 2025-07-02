@@ -46,7 +46,10 @@ export default function SimpleAgent() {
   const [isTyping, setIsTyping] = useState(false);
   const [caseData, setCaseData] = useState<CaseData | null>(null);
   const [isStarted, setIsStarted] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<ProcessedFile[]>([]);
+  const [isProcessingFiles, setIsProcessingFiles] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
