@@ -378,6 +378,53 @@ Please consult with a qualified attorney for legal advice.
                   strong case. This usually takes 10-15 minutes.
                 </p>
 
+                {/* AI Personality Selector */}
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-800 mb-3">
+                    Choose Your AI's Personality:
+                  </h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {PERSONALITIES.map((personality) => {
+                      const Icon = personality.icon;
+                      return (
+                        <div
+                          key={personality.id}
+                          className={`cursor-pointer border rounded-lg p-3 transition-all ${
+                            selectedPersonality === personality.id
+                              ? "border-legal-primary bg-legal-accent"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                          onClick={() => setSelectedPersonality(personality.id)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <Icon
+                              className={`h-5 w-5 mt-0.5 ${
+                                selectedPersonality === personality.id
+                                  ? "text-legal-primary"
+                                  : "text-gray-500"
+                              }`}
+                            />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-sm">
+                                {personality.name}
+                              </h4>
+                              <p className="text-xs text-gray-600 mb-1">
+                                {personality.description}
+                              </p>
+                              <p className="text-xs italic text-gray-500">
+                                "{personality.example}"
+                              </p>
+                            </div>
+                            {selectedPersonality === personality.id && (
+                              <CheckCircle className="h-4 w-4 text-legal-primary" />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="mb-6">
                   <p className="text-gray-600 text-sm mb-2">
                     <span className="font-bold text-red-600">Disclaimer:</span>{" "}
