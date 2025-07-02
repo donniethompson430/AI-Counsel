@@ -325,14 +325,90 @@ Please consult with a qualified attorney for legal advice.
                   legal violations, and help you organize the facts into a
                   strong case. This usually takes 10-15 minutes.
                 </p>
-                <Button
-                  onClick={startConversation}
-                  size="lg"
-                  className="bg-legal-primary hover:bg-legal-primary/90 px-8 py-3"
-                >
-                  <Bot className="h-5 w-5 mr-2" />
-                  Start AI Interview
-                </Button>
+                <div className="space-y-4">
+                  <Button
+                    onClick={startConversation}
+                    size="lg"
+                    className="bg-legal-primary hover:bg-legal-primary/90 px-8 py-3"
+                  >
+                    <Bot className="h-5 w-5 mr-2" />
+                    Start AI Interview
+                  </Button>
+
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 h-px bg-gray-300"></div>
+                    <span className="text-sm text-gray-500">or</span>
+                    <div className="flex-1 h-px bg-gray-300"></div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600">
+                      Upload evidence files first:
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-auto p-3"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        <div className="text-left">
+                          <div className="text-xs font-medium">Documents</div>
+                          <div className="text-xs text-gray-500">
+                            PDF, DOC, TXT
+                          </div>
+                        </div>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-auto p-3"
+                      >
+                        <Image className="h-4 w-4 mr-2" />
+                        <div className="text-left">
+                          <div className="text-xs font-medium">Photos</div>
+                          <div className="text-xs text-gray-500">
+                            JPG, PNG, WEBP
+                          </div>
+                        </div>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-auto p-3"
+                      >
+                        <Video className="h-4 w-4 mr-2" />
+                        <div className="text-left">
+                          <div className="text-xs font-medium">Videos</div>
+                          <div className="text-xs text-gray-500">
+                            MP4, MOV, WEBM
+                          </div>
+                        </div>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-auto p-3"
+                      >
+                        <Music className="h-4 w-4 mr-2" />
+                        <div className="text-left">
+                          <div className="text-xs font-medium">Audio</div>
+                          <div className="text-xs text-gray-500">MP3, WAV</div>
+                        </div>
+                      </Button>
+                    </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.mp3,.wav,.mpeg"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+
                 <p className="text-xs text-gray-500 mt-4">
                   Free • No signup required • Privacy protected
                 </p>
