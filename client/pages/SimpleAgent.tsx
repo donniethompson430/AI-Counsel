@@ -190,7 +190,7 @@ export default function SimpleAgent() {
     ) {
       addMessage(
         "agent",
-        "Thank you for sharing that. Excessive force is a serious violation of your civil rights. Under **Graham v. Connor**, force must be 'objectively reasonable' given the circumstances.\n\nLet me gather some specific details:\n\n• What type of force did they use? (grabbing, hitting, tasing, etc.)\n• How severe was the suspected crime?\n• Were you posing any immediate threat?\n• Were you resisting or trying to flee?\n\nCan you walk me through exactly what happened with the force?",
+        `Thank you for sharing that. Excessive force is a serious violation of your civil rights. Under **Graham v. Connor**, force must be 'objectively reasonable' given the circumstances.\n\nLet me gather some specific details:\n\n• What type of force did they use? (grabbing, hitting, tasing, etc.)\n• How severe was the suspected crime?\n• Were you posing any immediate threat?\n• Were you resisting or trying to flee?\n\nCan you walk me through exactly what happened with the force?${fileContext}`,
         "analysis",
       );
     } else if (
