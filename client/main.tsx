@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import CaseWorkspace from "./pages/CaseWorkspace";
+import SimpleAgent from "./pages/SimpleAgent";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
