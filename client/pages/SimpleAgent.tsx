@@ -403,20 +403,20 @@ Please consult with a qualified attorney for legal advice.
             <CardContent className="p-0">
               {/* Messages Area */}
               <div className="h-[500px] overflow-auto p-6 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              {message.role === "agent" && (
-                <div className="w-8 h-8 bg-legal-primary rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-4 w-4 text-white" />
-                </div>
-              )}
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    {message.role === "agent" && (
+                      <div className="w-8 h-8 bg-legal-primary rounded-full flex items-center justify-center flex-shrink-0">
+                        <Bot className="h-4 w-4 text-white" />
+                      </div>
+                    )}
 
-              <div
-                className={`max-w-[80%] rounded-lg p-4 ${
-                  message.role === "user"
+                    <div
+                      className={`max-w-[80%] rounded-lg p-4 ${
+                        message.role === "user"
                     ? "bg-legal-primary text-white"
                     : "bg-white border shadow-sm"
                 }`}
