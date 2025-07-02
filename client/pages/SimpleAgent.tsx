@@ -285,7 +285,7 @@ Please consult with a qualified attorney for legal advice.
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100">
         {/* Hero Section */}
-        <div className="container mx-auto px-6 py-12">
+        <div className="container mx-auto px-6 py-8">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-3 mb-6">
               <Scale className="h-12 w-12 text-legal-primary" />
