@@ -467,7 +467,7 @@ Please consult with a qualified attorney for legal advice.
 
         {/* Case Summary Sidebar */}
         {caseData && (
-          <div className="border-t bg-white p-4">
+          <div className="border-t bg-white p-4 flex-shrink-0">
             <Card className="border-green-200 bg-green-50">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
