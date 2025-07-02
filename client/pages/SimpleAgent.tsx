@@ -408,7 +408,7 @@ Please consult with a qualified attorney for legal advice.
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
-        <div className="flex-1 overflow-auto p-6 space-y-4">
+        <div className="flex-1 overflow-auto p-4 space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
