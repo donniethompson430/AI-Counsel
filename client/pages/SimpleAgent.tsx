@@ -356,7 +356,7 @@ Please consult with a qualified attorney for legal advice.
           </div>
 
           {/* Features */}
-          <div className="grid md:grid-cols-3 gap-6 mt-16 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
             <Card className="text-center p-6 border-0 bg-white/60">
               <Shield className="h-8 w-8 text-blue-600 mx-auto mb-3" />
               <h3 className="font-semibold mb-2">Violation Analysis</h3>
