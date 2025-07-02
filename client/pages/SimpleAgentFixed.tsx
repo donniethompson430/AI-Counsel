@@ -202,20 +202,50 @@ export default function SimpleAgentFixed() {
     }, 500);
 
     setTimeout(() => {
-      addMessage(
-        "agent",
-        "**Well, well, well... what do we have here?** 😏\n\nSeems like Officer Gonzales is not having a very good day. And it's only going to get worse.\n\n**HERE'S WHAT I SEE:**\n\n🎯 **IDENTIFIED VIOLATIONS:**\n• **Unlawful Search & Seizure** (4th Amendment)\n• **Excessive Force** (Graham v. Connor)\n• **False Arrest** (Lack of Probable Cause)\n\n👥 **EXTRACTED PERSONS:**\n• **Officer Gonzales** (DEFENDANT) - Primary violator\n• **Officer Martinez** (DEFENDANT) - Secondary participant  \n• **John Smith** (WITNESS) - Bystander who recorded incident\n• **Jane Doe** (VICTIM) - You, the complainant\n\n📊 **CASE STRENGTH:** High potential for §1983 civil rights claim\n\n⚖️ **TEXAS LEGAL FRAMEWORK:**\nUnder Texas Code of Criminal Procedure Art. 14.01 and the 4th Amendment, any search must be based on probable cause or valid consent. Your document indicates NEITHER existed.",
-        "analysis",
-      );
+      const analysisMessage = getPersonalityAnalysis();
+      addMessage("agent", analysisMessage, "analysis");
     }, 3000);
 
     setTimeout(() => {
-      addMessage(
-        "agent",
-        "**Let's discuss Officer Gonzales and his questionable actions... 🕵️‍♂️**\n\n**LEGAL EDUCATION - 4th Amendment (Texas Application):**\n\nAccording to **Texas Penal Code §38.02** and **U.S.C. §1983**, unreasonable search and seizure occurs when:\n\n1. **No Valid Warrant** was presented\n2. **No Probable Cause** existed for the search  \n3. **No Consent** was given by the subject\n4. **No Exigent Circumstances** justified immediate action\n\n**According to your statement**, you allegedly stated that:\n• Officer Gonzales searched your vehicle without consent\n• No warrant was presented\n• No contraband was in plain view\n• You were compliant and non-threatening\n\n**SO LET'S DISCUSS OFFICER GONZALES:**\n\n❓ **When Officer Gonzales initiated the search of your vehicle, did he:**\n   A) Show you a valid search warrant?\n   B) Ask for your explicit consent?\n   C) Explain the legal basis for the search?\n   D) None of the above?\n\n❓ **What EXACTLY did Officer Gonzales say to justify the search?**\n\n❓ **Were there any items in plain view that could have provided probable cause?**",
-        "question",
-      );
+      const questionMessage = getPersonalityQuestions();
+      addMessage("agent", questionMessage, "question");
     }, 6000);
+  };
+
+  const getPersonalityAnalysis = () => {
+    const baseAnalysis = `**HERE'S WHAT I SEE:**\n\n🎯 **IDENTIFIED VIOLATIONS:**\n• **Unlawful Search & Seizure** (4th Amendment)\n• **Excessive Force** (Graham v. Connor)\n• **False Arrest** (Lack of Probable Cause)\n\n👥 **EXTRACTED PERSONS:**\n• **Officer Gonzales** (DEFENDANT) - Primary violator\n• **Officer Martinez** (DEFENDANT) - Secondary participant  \n• **John Smith** (WITNESS) - Bystander who recorded incident\n• **Jane Doe** (VICTIM) - You, the complainant\n\n📊 **CASE STRENGTH:** High potential for §1983 civil rights claim\n\n⚖️ **TEXAS LEGAL FRAMEWORK:**\nUnder Texas Code of Criminal Procedure Art. 14.01 and the 4th Amendment, any search must be based on probable cause or valid consent. Your document indicates NEITHER existed.`;
+
+    switch (selectedPersonality) {
+      case "supportive":
+        return `**I've completed my analysis of your case.** 💙\n\nI want you to know that what happened to you was serious, and I'm here to help you navigate this process with care and understanding.\n\n${baseAnalysis}\n\n**You're not alone in this** - together we'll build the strongest possible case to protect your rights.`;
+
+      case "balanced":
+        return `**Analysis Complete - Here's What We're Working With:** ⚖️\n\n${baseAnalysis}\n\n**Professional Assessment:** Based on the evidence, you have substantial grounds for a civil rights claim. Let's proceed methodically to strengthen your position.`;
+
+      case "aggressive":
+        return `**Well, well, well... what do we have here?** 😏\n\nSeems like Officer Gonzales is not having a very good day. And it's only going to get worse.\n\n${baseAnalysis}\n\n**Bottom Line:** These officers royally screwed up, and now they're about to find out what happens when you violate someone's constitutional rights. Time to make them pay.`;
+
+      default:
+        return baseAnalysis;
+    }
+  };
+
+  const getPersonalityQuestions = () => {
+    const baseQuestions = `**LEGAL EDUCATION - 4th Amendment (Texas Application):**\n\nAccording to **Texas Penal Code §38.02** and **U.S.C. §1983**, unreasonable search and seizure occurs when:\n\n1. **No Valid Warrant** was presented\n2. **No Probable Cause** existed for the search  \n3. **No Consent** was given by the subject\n4. **No Exigent Circumstances** justified immediate action\n\n**According to your statement**, you allegedly stated that:\n• Officer Gonzales searched your vehicle without consent\n• No warrant was presented\n• No contraband was in plain view\n• You were compliant and non-threatening\n\n❓ **When Officer Gonzales initiated the search of your vehicle, did he:**\n   A) Show you a valid search warrant?\n   B) Ask for your explicit consent?\n   C) Explain the legal basis for the search?\n   D) None of the above?\n\n❓ **What EXACTLY did Officer Gonzales say to justify the search?**\n\n❓ **Were there any items in plain view that could have provided probable cause?**`;
+
+    switch (selectedPersonality) {
+      case "supportive":
+        return `**Let's explore what happened step by step.** 🤝\n\nI know these questions might bring up difficult memories, but each detail helps strengthen your case. Take your time, and remember - you're in control here.\n\n${baseQuestions}\n\n**Remember:** There are no wrong answers. I'm here to support you through this process.`;
+
+      case "balanced":
+        return `**Now let's examine Officer Gonzales' actions systematically.** 📋\n\n${baseQuestions}\n\n**These details are crucial** for establishing the legal violations and building your case strategy.`;
+
+      case "aggressive":
+        return `**Let's discuss Officer Gonzales and his questionable actions...** 🕵️‍♂️\n\nTime to tear apart this clown's so-called "police work" piece by piece.\n\n${baseQuestions}\n\n**Don't hold back** - every detail of this officer's incompetence matters. Let's expose exactly how badly they screwed up.`;
+
+      default:
+        return baseQuestions;
+    }
   };
 
   const handleFileUpload = async (
