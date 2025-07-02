@@ -74,9 +74,78 @@ export default function SimpleAgent() {
     setIsStarted(true);
     addMessage(
       "agent",
-      "Hello! I'm your AI Legal Assistant. I'm here to help you build a strong legal case by identifying potential violations and gathering the facts you need.\n\nTo get started, can you tell me briefly what happened? Don't worry about being perfect - I'll guide you through everything step by step.",
+      "Hello! I'm your AI Legal Assistant. I'm here to help you build a strong legal case by identifying potential violations and gathering the facts you need.\n\nYou can either tell me what happened or upload relevant files (documents, photos, videos, audio recordings). I can process PDFs, Word docs, images, videos, and more to help build your case.\n\nHow would you like to start?",
       "intro",
     );
+  };
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    setIsProcessingFiles(true);
+    const processedFiles: ProcessedFile[] = [];
+
+    for (const file of files) {
+      try {
+        const processed = await FileProcessor.processFile(file);
+        processedFiles.push(processed);
+      } catch (error) {
+        console.error("Error processing file:", error);
+        processedFiles.push({
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          metadata: {},
+          error: "Failed to process file",
+        });
+      }
+    }
+
+    setUploadedFiles((prev) => [...prev, ...processedFiles]);
+    setIsProcessingFiles(false);
+
+    // Add message about uploaded files
+    const fileList = processedFiles.map((f) => f.fileName).join(", ");
+    addMessage("user", `📎 Uploaded files: ${fileList}`);
+
+    // AI response about processing files
+    setTimeout(() => {
+      const hasContent = processedFiles.some(
+        (f) => f.content || f.metadata.extractedText,
+      );
+      if (hasContent) {
+        addMessage(
+          "agent",
+          "Great! I've processed your files and extracted relevant information. I can see some important details that will help with your case. Can you tell me more about what happened in your situation?",
+          "analysis",
+        );
+      } else {
+        addMessage(
+          "agent",
+          "I've received your files and they're ready for analysis. Now, can you tell me what happened in your situation? I'll use the uploaded evidence to strengthen your case.",
+          "question",
+        );
+      }
+    }, 1000);
+
+    // Clear the input
+    if (event.target) {
+      event.target.value = "";
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith("image/")) return Image;
+    if (fileType.startsWith("video/")) return Video;
+    if (fileType.startsWith("audio/")) return Music;
+    return File;
   };
 
   const handleSendMessage = () => {
