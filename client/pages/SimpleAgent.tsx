@@ -515,7 +515,7 @@ Please consult with a qualified attorney for legal advice.
 
         {/* Uploaded Files Display */}
         {uploadedFiles.length > 0 && (
-          <div className="border-t bg-gray-50 p-4">
+          <div className="border-t bg-gray-50 p-4 flex-shrink-0">
             <div className="flex items-center gap-2 mb-3">
               <Paperclip className="h-4 w-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">
