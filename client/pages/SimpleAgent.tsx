@@ -549,60 +549,62 @@ Please consult with a qualified attorney for legal advice.
           </div>
         )}
 
-        {/* Input Area */}
+        {/* Input Area - Fixed at bottom */}
         <div className="border-t bg-white p-4 flex-shrink-0">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isProcessingFiles}
-              className="self-end"
-            >
-              {isProcessingFiles ? (
-                <div className="w-4 h-4 border-2 border-legal-primary border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Upload className="h-4 w-4" />
-              )}
-            </Button>
-            <Textarea
-              value={currentInput}
-              onChange={(e) => setCurrentInput(e.target.value)}
-              placeholder="Tell me what happened, or upload files for analysis..."
-              className="flex-1 resize-none"
-              rows={2}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!currentInput.trim() || isTyping}
-              className="self-end"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex justify-between items-center mt-2">
-            <p className="text-xs text-gray-500">
-              Press Enter to send • Shift+Enter for new line
-            </p>
-            <p className="text-xs text-gray-500">
-              Supports: PDF, DOC, images, videos, audio
-            </p>
-          </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isProcessingFiles}
+                className="self-end"
+              >
+                {isProcessingFiles ? (
+                  <div className="w-4 h-4 border-2 border-legal-primary border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+              </Button>
+              <Textarea
+                value={currentInput}
+                onChange={(e) => setCurrentInput(e.target.value)}
+                placeholder="Tell me what happened, or upload files for analysis..."
+                className="flex-1 resize-none"
+                rows={2}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!currentInput.trim() || isTyping}
+                className="self-end"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <p className="text-xs text-gray-500">
+                Press Enter to send • Shift+Enter for new line
+              </p>
+              <p className="text-xs text-gray-500">
+                Supports: PDF, DOC, images, videos, audio
+              </p>
+            </div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.mp3,.wav,.mpeg"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.mp3,.wav,.mpeg"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </div>
         </div>
         <DevLink />
       </div>
