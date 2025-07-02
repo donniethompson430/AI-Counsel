@@ -180,7 +180,7 @@ export default function SimpleAgent() {
     ) {
       addMessage(
         "agent",
-        "I understand you had an encounter with law enforcement. This could potentially involve several legal issues. Let me ask you some specific questions:\n\n1. **Excessive Force**: Did the officer use any physical force against you?\n2. **Unlawful Search**: Did they search you, your vehicle, or belongings?\n3. **False Arrest**: Were you detained or arrested?\n\nWhich of these situations occurred, if any?",
+        `I understand you had an encounter with law enforcement. This could potentially involve several legal issues. Let me ask you some specific questions:\n\n1. **Excessive Force**: Did the officer use any physical force against you?\n2. **Unlawful Search**: Did they search you, your vehicle, or belongings?\n3. **False Arrest**: Were you detained or arrested?\n\nWhich of these situations occurred, if any?${fileContext}`,
         "question",
       );
     } else if (
