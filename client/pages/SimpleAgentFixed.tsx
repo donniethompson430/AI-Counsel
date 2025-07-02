@@ -40,6 +40,41 @@ interface CaseData {
   recommendations: string[];
 }
 
+type PersonalityType = "supportive" | "balanced" | "aggressive";
+
+interface PersonalityProfile {
+  id: PersonalityType;
+  name: string;
+  description: string;
+  icon: any;
+  example: string;
+}
+
+const PERSONALITIES: PersonalityProfile[] = [
+  {
+    id: "supportive",
+    name: "Professional & Supportive",
+    description: "Gentle, encouraging, and patient approach",
+    icon: CheckCircle,
+    example: "I'm here to help guide you through this process step by step.",
+  },
+  {
+    id: "balanced",
+    name: "Direct & Confident",
+    description: "Professional but assertive analysis",
+    icon: Scale,
+    example: "Let's analyze what happened and build a strong case.",
+  },
+  {
+    id: "aggressive",
+    name: "No BS & Aggressive",
+    description: "Dark humor, tell it like it is, backed by attitude",
+    icon: Shield,
+    example:
+      "Well, well, well... looks like someone's about to have a bad day.",
+  },
+];
+
 export default function SimpleAgentFixed() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentInput, setCurrentInput] = useState("");
@@ -48,6 +83,8 @@ export default function SimpleAgentFixed() {
   const [isStarted, setIsStarted] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<ProcessedFile[]>([]);
   const [isProcessingFiles, setIsProcessingFiles] = useState(false);
+  const [selectedPersonality, setSelectedPersonality] =
+    useState<PersonalityType>("balanced");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
