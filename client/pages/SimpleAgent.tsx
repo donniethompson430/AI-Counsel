@@ -550,7 +550,7 @@ Please consult with a qualified attorney for legal advice.
         )}
 
         {/* Input Area */}
-        <div className="border-t bg-white p-4">
+        <div className="border-t bg-white p-4 flex-shrink-0">
           <div className="flex gap-2">
             <Button
               variant="outline"
