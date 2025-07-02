@@ -353,8 +353,8 @@ Please consult with a qualified attorney for legal advice.
                     size="lg"
                     className="bg-legal-primary hover:bg-legal-primary/90 px-8 py-3"
                   >
-                    <Bot className="h-5 w-5 mr-2" />
-                    Start AI Interview
+                    <Bot className="h-5 w-5 mr-2" />I Understand & Agree - Start
+                    Interview
                   </Button>
 
                   <div className="flex items-center gap-4">
