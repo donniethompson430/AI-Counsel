@@ -22,6 +22,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<SimpleAgentFixed />} />
+          <Route path="/agent-system" element={<AgentSystemDemo />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/case/:caseId" element={<CaseWorkspace />} />
           <Route path="*" element={<NotFound />} />
