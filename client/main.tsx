@@ -10,6 +10,9 @@ import Dashboard from "./pages/Dashboard";
 import CaseWorkspace from "./pages/CaseWorkspace";
 import SimpleAgentFixed from "./pages/SimpleAgentFixed";
 import AgentSystemDemo from "./pages/AgentSystemDemo";
+import PublicDashboard from "./pages/PublicDashboard";
+import HandlerDashboard from "./pages/HandlerDashboard";
+import CaseWorkspaceNew from "./pages/CaseWorkspaceNew";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
