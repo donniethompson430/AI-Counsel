@@ -24,7 +24,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<SimpleAgentFixed />} />
+          {/* New 3-Dashboard Flow */}
+          <Route path="/" element={<PublicDashboard />} />
+          <Route path="/handler-dashboard" element={<HandlerDashboard />} />
+          <Route path="/case-workspace" element={<CaseWorkspaceNew />} />
+
+          {/* Development/Legacy Routes */}
+          <Route path="/simple-agent" element={<SimpleAgentFixed />} />
           <Route path="/agent-system" element={<AgentSystemDemo />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/case/:caseId" element={<CaseWorkspace />} />
