@@ -37,6 +37,10 @@ export class FileProcessor {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx files
     "application/rtf", // Rich Text Format
     "application/vnd.oasis.opendocument.text", // OpenDocument Text
+    "application/zip", // .zip files
+    "application/x-zip-compressed", // .zip files (alternative MIME type)
+    "application/x-rar-compressed", // .rar files
+    "application/x-7z-compressed", // .7z files
   ];
 
   static async processFile(file: File): Promise<ProcessedFile> {
