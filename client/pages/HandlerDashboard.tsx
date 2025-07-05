@@ -193,7 +193,16 @@ export default function HandlerDashboard() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Constitutional Weapon System
           </h1>
-          <p className="text-gray-600">Handler Assignment & Case Initiation</p>
+          <p className="text-gray-600 mb-4">
+            Handler Assignment & Case Initiation
+          </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto">
+            <p className="text-blue-800 font-medium">
+              Welcome! So glad you're ready to take action. First things first,
+              please select your handler's persona below, then give us your
+              information accordingly and we'll get the show on the road.
+            </p>
+          </div>
         </div>
 
         {/* Handler Selection */}
@@ -395,33 +404,6 @@ export default function HandlerDashboard() {
                   {handler.name}
                 </div>
                 <div className="text-sm text-gray-600">Handler Ready</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Instructions */}
-        <Card className="bg-yellow-50 border-yellow-200">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <Bot className="h-6 w-6 text-yellow-600 mt-1" />
-              <div>
-                <h4 className="font-semibold text-yellow-900 mb-2">
-                  Ready to Begin?
-                </h4>
-                <p className="text-yellow-800 text-sm mb-4">
-                  Choose how you'd like to begin building your case. Whether you
-                  upload comprehensive files or start by telling your story,
-                  I'll guide you through the same thorough case-building
-                  process.
-                </p>
-                <Button
-                  onClick={handleStartBuilding}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
-                >
-                  <ArrowRight className="h-4 w-4 mr-2" />
-                  Enter Case Workspace
-                </Button>
               </div>
             </div>
           </CardContent>
