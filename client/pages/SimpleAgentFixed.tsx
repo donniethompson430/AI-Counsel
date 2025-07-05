@@ -681,7 +681,7 @@ Please consult with a qualified attorney for legal advice.
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.mp3,.wav,.mpeg"
+                accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mov,.webm,.mp3,.wav,.mpeg,.zip,.rar,.7z"
                 onChange={handleFileUpload}
                 className="hidden"
               />
