@@ -185,37 +185,39 @@ export default function AgentSystemDemo() {
               </div>
             </CardHeader>
 
-            <CardContent className="flex-1 flex flex-col">
-              <ScrollArea className="flex-1 mb-4 p-4 border rounded">
+            <CardContent className="flex-1 flex flex-col p-3">
+              <ScrollArea className="flex-1 mb-3 p-2 border rounded-md">
                 {conversation.length === 0 ? (
-                  <div className="text-center text-muted-foreground">
+                  <div className="text-center text-muted-foreground text-sm p-4">
                     Start a conversation to see the Handler in action...
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {conversation.map((msg, idx) => (
                       <div key={idx} className="space-y-2">
-                        <div className="bg-blue-50 p-3 rounded-lg">
-                          <div className="font-semibold text-sm text-blue-700">
+                        <div className="bg-blue-50 p-2 rounded-lg">
+                          <div className="font-semibold text-xs text-blue-700 mb-1">
                             You:
                           </div>
-                          <div>{msg.user}</div>
+                          <div className="text-sm">{msg.user}</div>
                         </div>
 
-                        <div className="bg-green-50 p-3 rounded-lg">
-                          <div className="font-semibold text-sm text-green-700">
+                        <div className="bg-green-50 p-2 rounded-lg">
+                          <div className="font-semibold text-xs text-green-700 mb-1">
                             Handler ({persona}):
                           </div>
-                          <div className="whitespace-pre-line">
+                          <div className="whitespace-pre-line text-sm">
                             {msg.handler}
                           </div>
                         </div>
 
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-muted-foreground text-right">
                           {msg.timestamp.toLocaleTimeString()}
                         </div>
 
-                        {idx < conversation.length - 1 && <Separator />}
+                        {idx < conversation.length - 1 && (
+                          <Separator className="my-2" />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -229,10 +231,12 @@ export default function AgentSystemDemo() {
                   placeholder="Ask about your constitutional rights..."
                   onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   disabled={isLoading}
+                  className="text-sm"
                 />
                 <Button
                   onClick={handleSendMessage}
                   disabled={isLoading || !message.trim()}
+                  size="sm"
                 >
                   Send
                 </Button>
