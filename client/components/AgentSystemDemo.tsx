@@ -245,36 +245,34 @@ export default function AgentSystemDemo() {
           </Card>
         </div>
 
-        {/* System Status Panel */}
-        <div className="space-y-4">
+        {/* System Status Panel - Mobile Optimized */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Agent Status</CardTitle>
-              <CardDescription>
-                Real-time multi-agent coordination
-              </CardDescription>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Agent Status</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {systemStatus && (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {Object.entries(systemStatus.agents).map(
                     ([role, agent]: [string, any]) => (
                       <div
                         key={role}
-                        className="flex justify-between items-center"
+                        className="flex justify-between items-center text-sm"
                       >
-                        <div>
-                          <div className="font-medium">{agent.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            Tasks: {agent.taskQueueLength} | Memory:{" "}
-                            {agent.memoryObjects}
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium truncate">
+                            {agent.name.split(" ")[0]}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            T:{agent.taskQueueLength} M:{agent.memoryObjects}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 ml-2">
                           <div
                             className={`w-2 h-2 rounded-full ${getStatusColor(agent.status)}`}
                           />
-                          <span className="text-sm capitalize">
+                          <span className="text-xs capitalize">
                             {agent.status}
                           </span>
                         </div>
@@ -287,39 +285,40 @@ export default function AgentSystemDemo() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Case Isolation</CardTitle>
-              <CardDescription>Constitutional firewall active</CardDescription>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">System Status</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {systemStatus && (
-                <div className="space-y-2">
+                <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>Current Case:</span>
-                    <code className="text-sm">
+                    <span>Case:</span>
+                    <code className="text-xs">
                       {systemStatus.currentCaseId?.slice(-8)}
                     </code>
                   </div>
                   <div className="flex justify-between">
-                    <span>Breach Events:</span>
+                    <span>Breaches:</span>
                     <Badge
                       variant={
                         systemStatus.breachEvents.length === 0
                           ? "default"
                           : "destructive"
                       }
+                      className="h-5 text-xs"
                     >
                       {systemStatus.breachEvents.length}
                     </Badge>
                   </div>
                   <div className="flex justify-between">
-                    <span>System Status:</span>
+                    <span>Status:</span>
                     <Badge
                       variant={
                         systemStatus.initialized ? "default" : "secondary"
                       }
+                      className="h-5 text-xs"
                     >
-                      {systemStatus.initialized ? "Active" : "Initializing"}
+                      {systemStatus.initialized ? "Active" : "Init"}
                     </Badge>
                   </div>
                 </div>
@@ -327,52 +326,45 @@ export default function AgentSystemDemo() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">UPL Firewall</CardTitle>
-              <CardDescription>
-                Educational boundary enforcement
-              </CardDescription>
+          <Card className="sm:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">UPL Firewall</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-sm space-y-2">
+            <CardContent className="pt-0">
+              <div className="text-xs space-y-1">
                 <div className="font-medium text-green-600">
                   ✅ Handler educates
                 </div>
                 <div className="font-medium text-red-600">
                   ❌ Handler never advises
                 </div>
-                <div className="text-muted-foreground">
-                  All responses filtered for unauthorized practice of law
-                  violations
-                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Try These Examples</CardTitle>
+          <Card className="sm:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Try These Examples</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
+            <CardContent className="pt-0">
+              <div className="space-y-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full text-left justify-start h-auto p-3"
+                  className="w-full text-left justify-start h-auto p-2 text-xs"
                   onClick={() =>
                     setMessage(
                       "The officer used excessive force during my arrest",
                     )
                   }
                 >
-                  "The officer used excessive force during my arrest"
+                  "The officer used excessive force..."
                 </Button>
 
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full text-left justify-start h-auto p-3"
+                  className="w-full text-left justify-start h-auto p-2 text-xs"
                   onClick={() =>
                     setMessage("They searched my car without a warrant")
                   }
@@ -383,12 +375,12 @@ export default function AgentSystemDemo() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full text-left justify-start h-auto p-3"
+                  className="w-full text-left justify-start h-auto p-2 text-xs"
                   onClick={() =>
                     setMessage("Show me the legal standard for excessive force")
                   }
                 >
-                  "Show me the legal standard for excessive force"
+                  "Show me the legal standard..."
                 </Button>
               </div>
             </CardContent>
