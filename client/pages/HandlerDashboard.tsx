@@ -202,6 +202,64 @@ export default function HandlerDashboard() {
           <p className="text-gray-600">Handler Assignment & Case Initiation</p>
         </div>
 
+        {/* Handler Selection */}
+        <Card className="shadow-lg border-0 bg-white/95 backdrop-blur mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-center gap-2 text-xl">
+              <User className="h-6 w-6 text-blue-700" />
+              Choose Your AI Handler
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-center text-gray-600 mb-6">
+                Select the personality that best matches your communication
+                style and case needs:
+              </p>
+              <div className="grid grid-cols-1 gap-3">
+                {Object.values(HANDLER_PROFILES).map((profile) => {
+                  const Icon = profile.icon;
+                  return (
+                    <div
+                      key={profile.id}
+                      className={`cursor-pointer border rounded-lg p-4 transition-all ${
+                        selectedPersonality === profile.id
+                          ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() => setSelectedPersonality(profile.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <Icon
+                          className={`h-5 w-5 mt-0.5 ${
+                            selectedPersonality === profile.id
+                              ? "text-blue-600"
+                              : "text-gray-500"
+                          }`}
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">
+                            {profile.name} - {profile.fullName}
+                          </h4>
+                          <p className="text-xs text-gray-600 mb-2">
+                            {profile.personality}
+                          </p>
+                          <p className="text-xs italic text-gray-500">
+                            "{profile.greeting.slice(0, 80)}..."
+                          </p>
+                        </div>
+                        {selectedPersonality === profile.id && (
+                          <CheckCircle className="h-5 w-5 text-blue-600" />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Handler Introduction Card */}
         <Card
           className={`shadow-xl border-2 mb-8 ${getColorClasses(handler.color)}`}
