@@ -117,7 +117,7 @@ export default function HandlerDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedPersonality, setSelectedPersonality] = useState("strategist");
-  const [hasFiles, setHasFiles] = useState(false);
+
   const [userName, setUserName] = useState("Warrior");
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -160,12 +160,6 @@ export default function HandlerDashboard() {
       console.error("Failed to create case:", error);
       alert("Failed to create case. Please try again.");
     }
-  };
-
-  const handleUploadFiles = () => {
-    // TODO: Implement file upload functionality
-    setHasFiles(true);
-    alert("File upload functionality will be implemented here");
   };
 
   const getColorClasses = (color: string) => {
@@ -316,33 +310,29 @@ export default function HandlerDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-blue-900">
                 <Upload className="h-5 w-5" />
-                Start with Evidence
+                Upload Your Case Materials
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-4">
-                Upload documents, photos, videos, or audio recordings related to
-                your case. I'll analyze them and help build your story.
+                Upload your comprehensive case file, story, evidence, or any
+                documents related to your situation. I'll analyze everything and
+                help build your case.
               </p>
               <ul className="text-sm text-gray-500 mb-4 space-y-1">
+                <li>• Complete case files with story + evidence</li>
                 <li>• Police reports & incident documentation</li>
-                <li>• Photos/videos of injuries or property damage</li>
-                <li>• Medical records & treatment documentation</li>
-                <li>• Communication records & correspondence</li>
+                <li>• Photos/videos of injuries or violations</li>
+                <li>• Medical records & correspondence</li>
               </ul>
               <Button
-                onClick={handleUploadFiles}
+                onClick={handleStartBuilding}
                 variant="outline"
                 className="w-full"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                Upload Files
+                Upload & Start Building
               </Button>
-              {hasFiles && (
-                <Badge className="w-full mt-2 bg-green-100 text-green-800">
-                  Files uploaded - Ready to proceed
-                </Badge>
-              )}
             </CardContent>
           </Card>
 
@@ -351,23 +341,28 @@ export default function HandlerDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-900">
                 <MessageSquare className="h-5 w-5" />
-                Tell Your Story
+                Start with Your Story
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-4">
-                Start by describing what happened in your own words. I'll guide
-                you through the details and help identify legal violations.
+                Begin by describing what happened in your own words. I'll guide
+                you through gathering details and organizing everything into a
+                comprehensive case.
               </p>
               <ul className="text-sm text-gray-500 mb-4 space-y-1">
                 <li>• Describe the incident chronologically</li>
                 <li>• Identify key people and locations</li>
                 <li>• Explain the harm or violations</li>
-                <li>• Discuss your desired outcome</li>
+                <li>• Build comprehensive case documentation</li>
               </ul>
-              <Button variant="outline" className="w-full">
+              <Button
+                onClick={handleStartBuilding}
+                variant="outline"
+                className="w-full"
+              >
                 <MessageSquare className="h-4 w-4 mr-2" />
-                Start Interview
+                Start Building My Case
               </Button>
             </CardContent>
           </Card>
@@ -415,19 +410,17 @@ export default function HandlerDashboard() {
                   Ready to Begin?
                 </h4>
                 <p className="text-yellow-800 text-sm mb-4">
-                  {hasFiles
-                    ? "Great! You've uploaded files. Now I can analyze your evidence and help build your case. Click below to enter the secure case workspace."
-                    : "To get started, either upload evidence files or choose to tell your story first. I recommend starting with any documentation you have, as it helps me provide more accurate guidance."}
+                  Choose how you'd like to begin building your case. Whether you
+                  upload comprehensive files or start by telling your story,
+                  I'll guide you through the same thorough case-building
+                  process.
                 </p>
                 <Button
                   onClick={handleStartBuilding}
                   className="bg-yellow-600 hover:bg-yellow-700 text-white"
-                  disabled={!hasFiles && selectedPersonality === "razor"} // Razor demands evidence first
                 >
                   <ArrowRight className="h-4 w-4 mr-2" />
-                  {hasFiles
-                    ? "Start Building My Case"
-                    : "Continue to Case Workspace"}
+                  Enter Case Workspace
                 </Button>
               </div>
             </div>
