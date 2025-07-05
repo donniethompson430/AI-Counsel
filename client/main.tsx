@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import CaseWorkspace from "./pages/CaseWorkspace";
 import SimpleAgentFixed from "./pages/SimpleAgentFixed";
+import AgentSystemDemo from "./pages/AgentSystemDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
