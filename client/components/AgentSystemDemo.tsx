@@ -145,38 +145,43 @@ export default function AgentSystemDemo() {
         {/* Main Chat Interface */}
         <div className="w-full">
           <Card className="h-[70vh] flex flex-col">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>Handler Agent (The Frontliner)</CardTitle>
-                  <CardDescription>
-                    The only agent that talks to you - educational firewall
-                    enforced
-                  </CardDescription>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col space-y-2">
+                <div className="flex justify-between items-start">
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="text-lg">Handler Agent</CardTitle>
+                    <CardDescription className="text-sm">
+                      Educational firewall enforced
+                    </CardDescription>
+                  </div>
+                  <Badge variant="outline" className="ml-2 text-xs">
+                    {currentCaseId?.slice(-8)}
+                  </Badge>
                 </div>
-                <Badge variant="outline">
-                  Case: {currentCaseId?.slice(-8)}
-                </Badge>
-              </div>
 
-              <div className="flex gap-4 items-center">
-                <Select value={persona} onValueChange={handlePersonaChange}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(HandlerPersona).map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p.charAt(0).toUpperCase() + p.slice(1)} -{" "}
-                        {getPersonaDescription(p)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                  <Select value={persona} onValueChange={handlePersonaChange}>
+                    <SelectTrigger className="w-full sm:w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(HandlerPersona).map((p) => (
+                        <SelectItem key={p} value={p}>
+                          {p.charAt(0).toUpperCase() + p.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                <Button variant="outline" size="sm" onClick={createNewCase}>
-                  New Case
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={createNewCase}
+                    className="sm:w-auto"
+                  >
+                    New Case
+                  </Button>
+                </div>
               </div>
             </CardHeader>
 
