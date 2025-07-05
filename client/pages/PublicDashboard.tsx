@@ -118,67 +118,13 @@ export default function PublicDashboard() {
               </div>
             </div>
 
-            {/* Sign In/Up Options */}
-            <div className="flex justify-center gap-4 mb-4">
-              <Dialog open={isSignInOpen} onOpenChange={setIsSignInOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <LogIn className="h-4 w-4" />
-                    Sign In
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Sign In to AI Counsel</DialogTitle>
-                    <DialogDescription>
-                      Access your cases and continue your legal work.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <Input placeholder="Email" type="email" />
-                    <Input placeholder="Password" type="password" />
-                    <Button onClick={handleSignIn} className="w-full">
-                      Sign In
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog open={isSignUpOpen} onOpenChange={setIsSignUpOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <UserPlus className="h-4 w-4" />
-                    Sign Up
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create AI Counsel Account</DialogTitle>
-                    <DialogDescription>
-                      Create a free account to save your cases and track
-                      progress.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <Input placeholder="Full Name" />
-                    <Input placeholder="Email" type="email" />
-                    <Input placeholder="Password" type="password" />
-                    <Input placeholder="Confirm Password" type="password" />
-                    <Button onClick={handleSignUp} className="w-full">
-                      Create Account
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-
             <p className="text-center text-sm text-gray-600 mb-6">
               I'll interview you to understand your situation and help build
               your case.
             </p>
 
             {/* Legal Disclaimer */}
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
               <h4 className="font-bold text-gray-800 mb-2">
                 🔒 Important Agreement
               </h4>
@@ -226,23 +172,74 @@ export default function PublicDashboard() {
               </div>
             </div>
 
-            {/* Start Button */}
+            {/* Sign In/Up Options */}
             <div className="text-center">
-              <Button
-                onClick={handleStartInterview}
-                size="lg"
-                disabled={!agreedToTerms}
-                className={`px-8 py-3 ${
-                  agreedToTerms
-                    ? "bg-blue-700 hover:bg-blue-800"
-                    : "bg-gray-400 cursor-not-allowed"
-                }`}
-              >
-                <Bot className="h-5 w-5 mr-2" />I Understand & Agree - Start
-                Interview
-              </Button>
+              <p className="text-sm text-gray-600 mb-4">
+                To continue, please sign in or create an account:
+              </p>
 
-              <p className="text-xs text-gray-500 mt-4">
+              <div className="flex justify-center gap-4 mb-4">
+                <Dialog open={isSignInOpen} onOpenChange={setIsSignInOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={`flex items-center gap-2 ${!agreedToTerms ? "opacity-50 cursor-not-allowed" : ""}`}
+                      disabled={!agreedToTerms}
+                    >
+                      <LogIn className="h-4 w-4" />
+                      Sign In
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Sign In to AI Counsel</DialogTitle>
+                      <DialogDescription>
+                        Access your cases and continue your legal work.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input placeholder="Email" type="email" />
+                      <Input placeholder="Password" type="password" />
+                      <Button onClick={handleSignIn} className="w-full">
+                        Sign In
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={isSignUpOpen} onOpenChange={setIsSignUpOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={`flex items-center gap-2 ${!agreedToTerms ? "opacity-50 cursor-not-allowed" : ""}`}
+                      disabled={!agreedToTerms}
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Sign Up
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create AI Counsel Account</DialogTitle>
+                      <DialogDescription>
+                        Create a free account to save your cases and track
+                        progress.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input placeholder="Full Name" />
+                      <Input placeholder="Email" type="email" />
+                      <Input placeholder="Password" type="password" />
+                      <Input placeholder="Confirm Password" type="password" />
+                      <Button onClick={handleSignUp} className="w-full">
+                        Create Account
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <p className="text-xs text-gray-500">
                 Free • Privacy protected • Educational use only
               </p>
             </div>
