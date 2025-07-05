@@ -26,30 +26,26 @@ export default function PublicDashboard() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
 
-  const handleStartInterview = () => {
-    if (!agreedToTerms) {
-      alert("Please read and agree to the terms before proceeding.");
-      return;
-    }
-
-    // Navigate to Dashboard 2
+  const handleSignIn = () => {
+    // Close dialog and proceed to Dashboard 2 (agreement already checked)
+    setIsSignInOpen(false);
     navigate("/handler-dashboard", {
       state: {
         fromPublic: true,
+        userType: "returning",
       },
     });
   };
 
-  const handleSignIn = () => {
-    // For now, just close dialog and proceed
-    setIsSignInOpen(false);
-    handleStartInterview();
-  };
-
   const handleSignUp = () => {
-    // For now, just close dialog and proceed
+    // Close dialog and proceed to Dashboard 2 (agreement already checked)
     setIsSignUpOpen(false);
-    handleStartInterview();
+    navigate("/handler-dashboard", {
+      state: {
+        fromPublic: true,
+        userType: "new",
+      },
+    });
   };
 
   return (
@@ -72,6 +68,9 @@ export default function PublicDashboard() {
             <p className="text-lg font-semibold text-blue-900 mb-2">
               "It's not about who has the most money — it's who has the best
               paperwork."
+            </p>
+            <p className="text-sm text-blue-700 text-right italic">
+              — g. Thompson
             </p>
           </div>
         </div>
