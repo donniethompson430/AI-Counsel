@@ -131,20 +131,20 @@ export default function AgentSystemDemo() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2">
+    <div className="w-full min-h-screen p-2 sm:p-4 space-y-3">
+      <div className="text-center mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold mb-1">
           Constitutional Weapon System
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Multi-Agent Architecture for Pro Se Warriors
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex flex-col space-y-3">
         {/* Main Chat Interface */}
-        <div className="lg:col-span-2">
-          <Card className="h-[600px] flex flex-col">
+        <div className="w-full">
+          <Card className="h-[70vh] flex flex-col">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
